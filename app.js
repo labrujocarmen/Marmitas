@@ -821,8 +821,8 @@ function render() {
 async function init() {
   // Carregar dados seed
   const [rData, iData] = await Promise.all([
-    fetch('./data/recipes.json').then(r=>r.json()),
-    fetch('./data/ingredients.json').then(r=>r.json())
+    fetch('recipes.json').then(r=>r.json()),
+    fetch('ingredients.json').then(r=>r.json())
   ]);
   APP = { recipes: rData, ingredients: iData };
 
