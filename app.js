@@ -847,6 +847,15 @@ async function init() {
 }
 
 init().catch(err => {
-  document.getElementById('content').innerHTML =
-    `<div class="card warn"><h3>Erro ao iniciar</h3><div class="muted">${err.message}</div></div>`;
+  console.error(err);
+  const contentDiv = document.getElementById('content');
+  if (contentDiv) {
+    contentDiv.innerHTML = `
+      <div class="card warn">
+        <h3>Erro ao iniciar</h3>
+        <div class="muted" style="font-weight:bold; color:#d9534f;">${(err && err.message) ? err.message : String(err)}</div>
+        <pre style="white-space:pre-wrap; margin-top:12px; color:#600; background:#f9f9f9; padding:10px; border:1px solid #ddd; font-family:monospace; font-size:12px;">${(err && err.stack) ? err.stack : 'Sem stack trace disponível'}</pre>
+      </div>
+    `;
+  }
 });
