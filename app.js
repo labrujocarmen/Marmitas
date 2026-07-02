@@ -583,7 +583,10 @@ function renderInspiracoes() {
       <span style="font-weight:700;">${insp.notes||'(sem notas)'}</span>
       <span class="muted" style="font-size:11px;">${insp.date}</span>
     </div>
-    <div class="url">${insp.url}</div>
+    <div class="url">
+  <a href="${insp.url}" target="_blank" style="color: #4a5d39; text-decoration: underline; word-break: break-all; display: block; font-weight: 500;">${insp.url}</a>
+</div>
+
     <div class="row" style="margin-top:8px;gap:6px;">
       <button class="btn sm olive" data-insp2r="${insp.id}">🍽️ Criar receita</button>
       <button class="x-btn" data-insprm="${insp.id}">✕</button>
