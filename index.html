@@ -13,13 +13,13 @@
 
   <title>Marmitas da Semana</title>
 
-  <!-- Ícone para iOS (apple-touch-icon tem de ser PNG) -->
+  <!-- Ícones -->
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css">
+  <!-- CSS corrigido para a raiz -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -46,15 +46,15 @@
   <!-- Toast -->
   <div id="toast"></div>
 
-  <!-- Scripts: ordem importa — cada módulo usa funções dos anteriores -->
-  <script src="js/storage.js"></script>
-  <script src="js/recipes.js"></script>
-  <script src="js/macros.js"></script>
-  <script src="js/planner.js"></script>
-  <script src="js/shopping.js"></script>
-  <script src="js/freezer.js"></script>
-  <script src="js/settings.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Scripts corrigidos para a raiz (sem o js/) -->
+  <script src="storage.js"></script>
+  <script src="recipes.js"></script>
+  <script src="macros.js"></script>
+  <script src="planner.js"></script>
+  <script src="shopping.js"></script>
+  <script src="freezer.js"></script>
+  <script src="settings.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
