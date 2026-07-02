@@ -415,19 +415,23 @@ function renderMore() {
     ['precos','💶 Preços'],['batch','🔥 Batch cooking'],
     ['faturas','📸 Faturas'],['inspiracoes','📌 Inspirações']
   ];
-  return `
-  <div class="pills">
-    ${tabs.map(([id,lb]) => `<button class="${sub===id?'active':''}" data-mtab="${id}">${lb}</button>`).join('')}
-  </div>
-  ${{
+  const map = {
     freezer:      renderFreezer,
     checklist:    renderChecklist,
     precos:       renderPrecos,
     batch:        renderBatch,
     faturas:      renderFaturas,
     inspiracoes:  renderInspiracoes
-  }[sub]()}`;
+  };
+  // Fallback seguro: se estiver vazio, mostra o freezer em vez de dar erro
+  const body = (map[sub] || renderFreezer)(); 
+  return `
+  <div class="pills">
+    ${tabs.map(([id,lb]) => `<button class="${sub===id?'active':''}" data-mtab="${id}">${lb}</button>`).join('')}
+  </div>
+  ${body}`;
 }
+
 
 function renderFreezer() {
   const max = Math.max(1, ...S.freezer.map(f => f.qty));
