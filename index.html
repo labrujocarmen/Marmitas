@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+
+  <!-- PWA / iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Marmitas">
+  <meta name="theme-color" content="#2C3520">
+
+  <title>Marmitas da Semana</title>
+
+  <!-- Ícone para iOS (apple-touch-icon tem de ser PNG) -->
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Topbar -->
+  <div id="topbar">
+    <div>
+      <div class="title">🍱 Marmitas</div>
+      <div class="subtitle" id="topsub">A carregar…</div>
+    </div>
+    <div class="week-badge" id="week-badge">Semana 1</div>
+  </div>
+
+  <!-- Conteúdo principal -->
+  <div id="content">
+    <div class="empty" style="padding-top:60px;">
+      <span class="ic">⏳</span>
+      A carregar os teus dados…
+    </div>
+  </div>
+
+  <!-- Navegação inferior -->
+  <nav id="nav"></nav>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Scripts: ordem importa — cada módulo usa funções dos anteriores -->
+  <script src="js/storage.js"></script>
+  <script src="js/recipes.js"></script>
+  <script src="js/macros.js"></script>
+  <script src="js/planner.js"></script>
+  <script src="js/shopping.js"></script>
+  <script src="js/freezer.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
