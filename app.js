@@ -478,6 +478,3 @@ function render() {
 
 document.addEventListener('DOMContentLoaded', initAppState);
 if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
-
-document.addEventListener('DOMContentLoaded', initAppState);
-if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
