@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
 
-  <!-- PWA / iOS -->
+  <!-- PWA / iOS (Configurações para funcionar como App no Telemóvel) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,48 +13,39 @@
 
   <title>Marmitas da Semana</title>
 
-  <!-- Ícones -->
+  <!-- Ícones e Manifesto Guardados na Tua Pasta -->
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
 
-  <!-- CSS corrigido para a raiz -->
+  <!-- O teu ficheiro de estilos correto -->
   <link rel="stylesheet" href="style.css">
+  
+  <style>
+    /* Pequeno ajuste para garantir que os ecrãs novos herdam o teu design bonito */
+    #app-root {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Topbar -->
-  <div id="topbar">
-    <div>
-      <div class="title">🍱 Marmitas</div>
-      <div class="subtitle" id="topsub">A carregar…</div>
-    </div>
-    <div class="week-badge" id="week-badge">Semana 1</div>
-  </div>
+  <!-- O ponto central onde o teu novo motor unificado vai desenhar os ecrãs -->
+  <div id="app-root"></div>
 
-  <!-- Conteúdo principal -->
-  <div id="content">
-    <div class="empty" style="padding-top:60px;">
-      <span class="ic">⏳</span>
-      A carregar os teus dados…
-    </div>
-  </div>
-
-  <!-- Navegação inferior -->
-  <nav id="nav"></nav>
-
-  <!-- Toast -->
-  <div id="toast"></div>
-
-  <!-- Scripts corrigidos para a raiz (sem o js/) -->
-  <script src="storage.js"></script>
-  <script src="recipes.js"></script>
-  <script src="macros.js"></script>
-  <script src="planner.js"></script>
-  <script src="shopping.js"></script>
-  <script src="freezer.js"></script>
-  <script src="settings.js"></script>
-  <script src="app.js"></script>
+  <!-- Carrega APENAS o teu novo ficheiro correto e unificado -->
+  <script src="app (1).js"></script>
 
 </body>
 </html>
