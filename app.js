@@ -209,191 +209,62 @@ window.toggleSelectRecipe = function(id) {
   else S.selectedLunches.push(id);
   save(); render();
 };
+/* app.js — PARTE 5 */
 function renderDashboard() {
-  const totalGasto = monthSpend();
-  
-  // Impede falhas caso as configurações das macros estejam vazias
-  if (!S.settings) S.settings = {};
-  if (!S.settings.kcalTu) S.settings.kcalTu = 1200;
-  if (!S.settings.kcalEle) S.settings.kcalEle = 1800;
-  if (!S.settings.protTu) S.settings.protTu = 135;
-  if (!S.settings.protEle) S.settings.protEle = 200;
-
-  // Recalcula o peso em kg com base nas macros ativas
-  const carneNecessaria = ((S.settings.protTu * 6) + (S.settings.protEle * 6)) / 1000;
-  const hidratosNecessarios = ((80 * 6) + (100 * 6)) / 1000;
-
-  // NOVO MOTOR DO GERADOR: Sorteia 2 Frangos, 1 Carne, 1 Peixe e 2 Lanches sem repetir à toa
-  window.generateWeeklyMenu = function() {
-    const all = getAllRecipes();
-    const frangos = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
-    const carnes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão') || r.name.toLowerCase().includes('pato')));
-    const peixes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
-    const lanches = all.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
-
-    let escolha = [];
-    if (frangos.length >= 2) {
-      const fSh = [...frangos].sort(() => 0.5 - Math.random());
-      escolha.push(fSh[0].id, fSh[1].id);
-    }
-    if (carnes.length >= 1) {
-      const cSh = [...carnes].sort(() => 0.5 - Math.random());
-      escolha.push(cSh[0].id);
-    }
-    if (peixes.length >= 1) {
-      const pSh = [...peixes].sort(() => 0.5 - Math.random());
-      escolha.push(pSh[0].id);
-    }
-    
-    if (lanches.length >= 2) {
-      const lSh = [...lanches].sort(() => 0.5 - Math.random());
-      S.selectedSnacks = [lSh[0].id, lSh[1].id];
-    }
-
-    // Se o sorteio misto correr bem, baralha os 4 pratos finais pelos dias
-    if(escolha.length > 0) {
-      S.selectedLunches = escolha.sort(() => 0.5 - Math.random());
-    }
-    save(); render();
-    alert("✨ Ementa Semanal Equilibrada Gerada (Frango, Carne, Peixe e Lanches)!");
-  };
-
-  // Botão solicitado para alterar as macros tuas e dele diretamente no ecrã
-  window.changeMacrosPrompt = function() {
-    S.settings.kcalTu = parseInt(prompt("As tuas Calorias Diárias (Kcal):", S.settings.kcalTu)) || 1200;
-    S.settings.protTu = parseInt(prompt("A tua Proteína por Marmita (g):", S.settings.protTu)) || 135;
-    S.settings.kcalEle = parseInt(prompt("Calorias Diárias Dele (Kcal):", S.settings.kcalEle)) || 1800;
-    S.settings.protEle = parseInt(prompt("Proteína Dele por Marmita (g):", S.settings.protEle)) || 200;
-    save(); render();
-  };
-
-  const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
-  const allRecs = getAllRecipes();
-  
   return `
-    <!-- 🩸 GUIA DE SAÚDE LIPEDEMA -->
-    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px;">
-      <small style="color:#c2185b; font-weight:bold; display:block;">%🩺 GUIA DE SAÚDE & LIPEDEMA</small>
-      <p style="margin:5px 0; font-size:12px; color:#555;">Alimentos ricos em potássio e antioxidantes anti-inflamatórios:</p>
-      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;">
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Kiwi / Frutos Vermelhos / Abacate</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Espinafres / Brócolos / Tomate</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Salmão / Sardinha / Azeite</span>
-      </div>
+    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
+      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS DESTE MÊS</small>
+      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${monthSpend().toFixed(2)}</h2>
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">Registar Fatura Total</button>
     </div>
-
-    <!-- PAINEL DE METAS E BOTAO EDITÁVEL DE MACROS -->
-    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <small style="color:#6c757d; font-weight:bold;">⚖️ METAS SEMANAIS DA FAMÍLIA</small>
-        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️ Alterar Macros</button>
+    <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; color:#333;">🍱 Menu da Semana</h3>
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu</button>
       </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div style="background:#f1f3f5; padding:8px; border-radius:6px; text-align:center;">
-          <b style="font-size:12px; display:block;">👩‍🍳 Tu (${S.settings.kcalTu} Kcal)</b>
-          <span style="font-size:13px; font-weight:bold; color:#007bff;">${S.settings.protTu}g Proteína</span>
-        </div>
-        <div style="background:#f1f3f5; padding:8px; border-radius:6px; text-align:center;">
-          <b style="font-size:12px; display:block;">👨‍🦱 Marido (${S.settings.kcalEle} Kcal)</b>
-          <span style="font-size:13px; font-weight:bold; color:#6f42c1;">${S.settings.protEle}g Proteína</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- GUIA DE COMPRAS DE MATÉRIA-PRIMA -->
-    <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; font-size:12px; line-height:1.5;">
-      <b>📦 MATÉRIA-PRIMA PARA AS 12 MARMITAS:</b><br>
-      🥩 Proteínas Totais: <span style="color:#28a745; font-weight:bold;">${carneNecessaria.toFixed(1)} kg</span> limpos.<br>
-      🍚 Hidratos Totais: <span style="color:#007bff; font-weight:bold;">${hidratosNecessarios.toFixed(1)} kg</span> de base.
-    </div>
-
-    <!-- CONTROLO FINANCEIRO -->
-    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:12px; border-radius:8px; margin-bottom:15px;">
-      <h3 style="margin:0; font-size:14px; color:#28a745;">Gasto Real do Mês: €${totalGasto.toFixed(2)}</h3>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; margin-top:6px; font-size:12px;">Registar Talão</button>
-    </div>
-
-    <!-- CALENDÁRIO SEMANAL EXCLUSIVO DE SEGUNDA A SEXTA -->
-    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; color:#333; font-size:14px;">📅 Marmitas da Semana (Segunda a Sexta)</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">✨ Gerar Menu Bruto</button>
-      </div>
-      
-      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:12px; margin:0;">Clica em "Gerar Menu Bruto" para montar a semana.</p>' : ''}
-      
-      ${dias.map((dia, idx) => {
-        const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
-        const snackId = S.selectedSnacks ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
-        const lunchRec = allRecs.find(x => x.id === id ? id === lunchId : x.id === lunchId);
-        const snackRec = allRecs.find(x => x.id === id ? id === snackId : x.id === snackId);
-
-        return `
-          <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; font-size:13px;">
-            <b style="color:#007bff; display:block; margin-bottom:2px;">📅 ${dia}:</b>
-            <div style="padding-left:10px; color:#333;">
-              🍱 Almoço: <b>${lunchRec ? lunchRec.name : 'Não definido'}</b><br>
-              🥛 Lanche: <span style="color:#555;">${snackRec ? snackRec.name : 'Não definido'}</span>
-            </div>
-          </div>
-        `;
-      }).join('')}
+      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:13px;">Nenhum prato escolhido. Clica em "Gerar Menu" ou escolhe no "Livro".</p>' : ''}
+      <ul style="padding-left:20px; margin:0;">
+        ${S.selectedLunches.map(id => {
+          const r = getAllRecipes().find(x => x.id === id);
+          return r ? `<li style="padding:6px 0; color:#333; font-weight:500;">${r.name} <small style="color:#6c757d;">(${r.cat})</small></li>` : '';
+        }).join('')}
+      </ul>
     </div>
   `;
 }
 
 function renderRecipes() {
   const all = getAllRecipes();
-  
-  // Filtra as receitas em tempo real com base no que digitares na barra
-  const query = (S.searchQuery || '').toLowerCase().trim();
-  const filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
-
-  // Função para pesquisar letra a letra sem travar a escrita do telemóvel
-  window.executeSearch = function(txt) {
-    S.searchQuery = txt;
-    save(); render();
-    setTimeout(() => {
-      const input = document.getElementById('recipe-search-bar');
-      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
-    }, 50);
-  };
-
   return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
-      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Nova</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333;">📖 Livro de Receitas (${all.length})</h3>
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Incluir Receita</button>
     </div>
-
-    <!-- BARRA DE PESQUISA SIMPLES SOLICITADA -->
-    <div style="margin-bottom:15px;">
-      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar receita (ex: frango, lanche, carne)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
-    </div>
-
-    ${filtered.map(r => `
-      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.01);">
+    ${all.map(r => `
+      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
           <div style="display:flex; gap:5px;">
-            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-              ${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
+            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id)?'#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${S.selectedLunches.includes(r.id) ? 'Remover' : 'Escolher'}
             </button>
             ${!r.isSuggestion && !r.isFromInstagram ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>` : ''}
           </div>
         </div>
-        <div style="margin-top:6px; display:flex; gap:4px; flex-wrap:wrap;">
+        <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
           <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
+          ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
+          ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
           ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
           ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
         </div>
-        
-        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo do Instagram</a></div>` : ''}
-
-        <!-- DETALHES DE INGREDIENTES E PREPARO SEMPRE VISÍVEIS -->
-        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:8px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
-          <p style="margin:0 0 6px 0;"><b>🛒 Ingredientes:</b> ${r.ings || 'Peito de frango, vegetais e temperos a gosto.'}</p>
-          <p style="margin:0;"><b>👩‍🍳 Passo a Passo:</b> ${r.steps || 'Grelhar ou estufar os ingredientes com os vossos temperos favoritos.'}</p>
-        </div>
+        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
+        ${r.bimby || r.airfryer ? `
+          <div style="background:#f8f9fa; padding:8px; font-size:12px; border-radius:4px; margin-top:8px; border-top:1px dashed #eee; color:#555;">
+            ${r.bimby ? `<b>Bimby:</b> ${r.bimby}<br>` : ''}
+            ${r.airfryer ? `<b>Airfryer:</b> ${r.airfryer}` : ''}
+          </div>
+        ` : ''}
       </div>
     `).join('')}
   `;
@@ -428,6 +299,36 @@ function renderPantry() {
   `;
 }
 /* app.js — PARTE 6 */
+function renderShopping() {
+  const missingFromPantry = S.pantryStock.filter(x => !x.has);
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
+    </div>
+    
+    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Falta na Despensa (Aviso Automático):</b>
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:20px;">
+      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Armário abastecido! Nada em falta.</p>' : ''}
+      <ul style="padding-left:15px; margin:0; font-size:13px; color:#c82333;">
+        ${missingFromPantry.map(i => `<li style="padding:3px 0; font-weight:600;">${i.name} <small style="color:#6c757d;">(${i.cat})</small></li>`).join('')}
+      </ul>
+    </div>
+
+    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista do Supermercado:</b>
+    <div style="background:#fff; padding:5px 12px; border-radius:8px; border:1px solid #eee;">
+      ${S.shoppingList.map(item => `
+        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="transform: scale(1.2); cursor:pointer;"> 
+          <span style="text-decoration:${item.done ? 'line-through' : 'none'}; color:${item.done ? '#aaa' : '#333'}; font-weight:500; font-size:14px;">${item.name}</span> 
+          <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:auto;">${item.cat}</span>
+        </div>
+      `).join('')}
+      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; padding:10px 0; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
+    </div>
+  `;
+}
 
 function renderInstagram() {
   return `
@@ -464,7 +365,7 @@ function render() {
   root.innerHTML = `
     <nav style="display:grid; grid-template-columns: repeat(5, 1fr); background:#111; color:#fff; font-size:11px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
       <div onclick="switchTab('dashboard')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
-      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
+      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Livro</div>
       <div onclick="switchTab('pantry')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Stock</div>
       <div onclick="switchTab('shopping')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
       <div onclick="switchTab('instagram')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
