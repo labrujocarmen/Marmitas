@@ -429,36 +429,55 @@ function renderPantry() {
   `;
 }
 /* app.js — PARTE 6 */
-function renderShopping() {
-  const missingFromPantry = S.pantryStock.filter(x => !x.has);
 
+function renderInstagram() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
+      <h3 style="margin:0; color:#333;">📸 Links do Instagram</h3>
+      <button onclick="addInstagramLink()" style="background:#d62976; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">🔗 Guardar Link</button>
     </div>
     
-    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Falta na Despensa (Aviso Automático):</b>
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:20px;">
-      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Armário abastecido! Nada em falta.</p>' : ''}
-      <ul style="padding-left:15px; margin:0; font-size:13px; color:#c82333;">
-        ${missingFromPantry.map(i => `<li style="padding:3px 0; font-weight:600;">${i.name} <small style="color:#6c757d;">(${i.cat})</small></li>`).join('')}
-      </ul>
-    </div>
-
-    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista do Supermercado:</b>
-    <div style="background:#fff; padding:5px 12px; border-radius:8px; border:1px solid #eee;">
-      ${S.shoppingList.map(item => `
-        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px;">
-          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="transform: scale(1.2); cursor:pointer;"> 
-          <span style="text-decoration:${item.done ? 'line-through' : 'none'}; color:${item.done ? '#aaa' : '#333'}; font-weight:500; font-size:14px;">${item.name}</span> 
-          <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:auto;">${item.cat}</span>
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee;">
+      ${S.instagramInspirations.map(item => `
+        <div style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+          <div style="font-size:14px; color:#333;">
+            <b>${item.name}</b> - <span style="color:#6c757d;">${item.category}</span> - 
+            <a href="${item.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none;">Link</a>
+          </div>
+          <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>
         </div>
       `).join('')}
-      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; padding:10px 0; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
+      ${S.instagramInspirations.length === 0 ? '<p style="color:#888; font-size:13px; margin:0; padding:10px 0;">Nenhuma inspiração guardada. Clica em "Guardar Link".</p>' : ''}
     </div>
   `;
 }
+
+function render() {
+  const root = document.getElementById('app-root') || document.body;
+  if (!root) return;
+
+  let view = renderDashboard();
+  if (S.tab === 'recipes') view = renderRecipes();
+  if (S.tab === 'pantry') view = renderPantry();
+  if (S.tab === 'shopping') view = renderShopping();
+  if (S.tab === 'instagram') view = renderInstagram();
+
+  root.innerHTML = `
+    <nav style="display:grid; grid-template-columns: repeat(5, 1fr); background:#111; color:#fff; font-size:11px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
+      <div onclick="switchTab('dashboard')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
+      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
+      <div onclick="switchTab('pantry')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Stock</div>
+      <div onclick="switchTab('shopping')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
+      <div onclick="switchTab('instagram')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
+    </nav>
+    <div style="padding:15px; max-width:600px; margin:0 auto; font-family:sans-serif; background:#f8f9fa; min-height:100vh; box-sizing:border-box;">
+      ${view}
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', initAppState);
+if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
 
 function renderInstagram() {
   return `
