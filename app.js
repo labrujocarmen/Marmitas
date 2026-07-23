@@ -342,44 +342,63 @@ function renderDashboard() {
   `;
 }
 
-
-
 function renderRecipes() {
   const all = getAllRecipes();
+  
+  // Filtra as receitas em tempo real com base no que digitares na barra
+  const query = (S.searchQuery || '').toLowerCase().trim();
+  const filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+
+  // Função para pesquisar letra a letra sem travar a escrita do telemóvel
+  window.executeSearch = function(txt) {
+    S.searchQuery = txt;
+    save(); render();
+    setTimeout(() => {
+      const input = document.getElementById('recipe-search-bar');
+      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
+    }, 50);
+  };
+
   return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">📖 Livro de Receitas (${all.length})</h3>
-      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Incluir Receita</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Nova</button>
     </div>
-    ${all.map(r => `
-      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+
+    <!-- BARRA DE PESQUISA SIMPLES SOLICITADA -->
+    <div style="margin-bottom:15px;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar receita (ex: frango, lanche, carne)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    ${filtered.map(r => `
+      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.01);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
           <div style="display:flex; gap:5px;">
-            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id)?'#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-              ${S.selectedLunches.includes(r.id) ? 'Remover' : 'Escolher'}
+            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
             </button>
             ${!r.isSuggestion && !r.isFromInstagram ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>` : ''}
           </div>
         </div>
-        <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
+        <div style="margin-top:6px; display:flex; gap:4px; flex-wrap:wrap;">
           <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
-          ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
-          ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
           ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
           ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
         </div>
-        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
-        ${r.bimby || r.airfryer ? `
-          <div style="background:#f8f9fa; padding:8px; font-size:12px; border-radius:4px; margin-top:8px; border-top:1px dashed #eee; color:#555;">
-            ${r.bimby ? `<b>Bimby:</b> ${r.bimby}<br>` : ''}
-            ${r.airfryer ? `<b>Airfryer:</b> ${r.airfryer}` : ''}
-          </div>
-        ` : ''}
+        
+        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo do Instagram</a></div>` : ''}
+
+        <!-- DETALHES DE INGREDIENTES E PREPARO SEMPRE VISÍVEIS -->
+        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:8px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
+          <p style="margin:0 0 6px 0;"><b>🛒 Ingredientes:</b> ${r.ings || 'Peito de frango, vegetais e temperos a gosto.'}</p>
+          <p style="margin:0;"><b>👩‍🍳 Passo a Passo:</b> ${r.steps || 'Grelhar ou estufar os ingredientes com os vossos temperos favoritos.'}</p>
+        </div>
       </div>
     `).join('')}
   `;
 }
+
 
 function renderPantry() {
   const groups = {};
