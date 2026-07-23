@@ -213,31 +213,37 @@ window.toggleSelectRecipe = function(id) {
 function renderDashboard() {
   const totalGasto = monthSpend();
   
-  // Garante que as macros existem na memória ou assume o teu padrão (1200 / 1800)
+  // Garante que todas as configurações de macros existem na memória ou assume o padrão
   if (!S.settings) S.settings = {};
   if (!S.settings.kcalTu) S.settings.kcalTu = 1200;
   if (!S.settings.kcalEle) S.settings.kcalEle = 1800;
-  if (!S.settings.protTu) S.settings.protTu = 135; // a tua média de proteína (120g-150g)
-  if (!S.settings.protEle) S.settings.protEle = 200; // a proteína dele
+  if (!S.settings.protTu) S.settings.protTu = 135; 
+  if (!S.settings.protEle) S.settings.protEle = 200; 
+  if (!S.settings.carboTu) S.settings.carboTu = 80;   // Teu carboidrato padrão por marmita
+  if (!S.settings.carboEle) S.settings.carboEle = 100; // Carboidrato dele padrão por marmita
 
-  // Métricas Inteligentes agora CALCULADAS com base nas tuas definições dinâmicas
+  // AGORA OS HIDRATOS SÃO DINÂMICOS: recalculam automaticamente com base no que definires
   const carneNecessaria = ((S.settings.protTu * 6) + (S.settings.protEle * 6)) / 1000; 
-  const hidratosNecessarios = ((80 * 6) + (100 * 6)) / 1000; 
+  const hidratosNecessarios = ((S.settings.carboTu * 6) + (S.settings.carboEle * 6)) / 1000; 
 
-  // Função interna para o botão abrir os prompts e atualizar a aplicação na hora
+  // Função do botão atualizada para incluir também a edição dos hidratos/carbos
   window.changeMacrosPrompt = function() {
     S.settings.kcalTu = parseInt(prompt("As tuas Calorias Diárias (Kcal):", S.settings.kcalTu)) || 1200;
     S.settings.protTu = parseInt(prompt("A tua Proteína por Marmita (g):", S.settings.protTu)) || 135;
+    S.settings.carboTu = parseInt(prompt("Os teus Hidratos por Marmita (g):", S.settings.carboTu)) || 80;
+    
     S.settings.kcalEle = parseInt(prompt("Calorias Diárias Dele (Kcal):", S.settings.kcalEle)) || 1800;
     S.settings.protEle = parseInt(prompt("Proteína Dele por Marmita (g):", S.settings.protEle)) || 200;
+    S.settings.carboEle = parseInt(prompt("Hidratos Dele por Marmita (g):", S.settings.carboEle)) || 100;
+    
     save(); 
-    render(); // Força a app a redesenhar as caixas com os números novos
+    render(); 
   };
 
   return `
     <!-- 🩸 BLOCO DE SAÚDE: ALIMENTAÇÃO LIPEDEMA -->
     <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE & LIPEDEMA</small>
+      <small style="color:#c2185b; font-weight:bold; display:block;">%🩺 GUIA DE SAÚDE & LIPEDEMA</small>
       <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">
         Para controlar a inflamação e a retenção, foca em alimentos ricos em <b>potássio e antioxidantes</b>. 
         Tenta incluir no teu stock semanal:
@@ -261,17 +267,17 @@ function renderDashboard() {
         <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
           <b style="font-size:13px; color:#333; display:block;">👩‍🍳 A tua Ementa</b>
           <span style="font-size:16px; font-weight:bold; color:#007bff;">${S.settings.kcalTu} Kcal</span>
-          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🍗 ${S.settings.protTu}g Prot<br>🥦 40% Legumes<br>🍚 20% Hidratos</small>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🍗 ${S.settings.protTu}g Prot<br>🥦 40% Legumes<br>🍚 ${S.settings.carboTu}g Hidratos</small>
         </div>
         <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
           <b style="font-size:13px; color:#333; display:block;">👨‍🦱 Marido (6 Marmitas)</b>
           <span style="font-size:16px; font-weight:bold; color:#6f42c1;">${S.settings.kcalEle} Kcal</span>
-          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🥩 ${S.settings.protEle}g Proteína<br>🥦 40% Legumes<br>🍚 100g Hidratos</small>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🥩 ${S.settings.protEle}g Prot<br>🥦 40% Legumes<br>🍚 ${S.settings.carboEle}g Hidratos</small>
         </div>
       </div>
     </div>
 
-    <!-- 🛒 WIDGET DE GESTÃO DE COMPRAS EM MASSA (DINÂMICO) -->
+    <!-- 🛒 WIDGET DE GESTÃO DE COMPRAS EM MASSA -->
     <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
       <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">📦 GUIA DE COMPRAS DE MATÉRIA-PRIMA</small>
       <p style="margin:5px 0 12px 0; font-size:12px; color:#666;">Para garantires <b>12 marmitas</b> variadas com 2 a 3 tipos de proteína diferentes:</p>
