@@ -312,16 +312,20 @@ function renderDashboard() {
   `;
 }
 
-
-
 function renderRecipes() {
   const all = getAllRecipes();
+  
+  // Filtra as receitas em tempo real com base na barra de pesquisa
+  const query = (S.searchQuery || '').toLowerCase().trim();
+  const filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">📖 Livro de Receitas (${all.length})</h3>
+      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
       <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Incluir Receita</button>
     </div>
-    ${all.map(r => `
+    
+    ${filtered.map(r => `
       <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
@@ -332,6 +336,7 @@ function renderRecipes() {
             ${!r.isSuggestion && !r.isFromInstagram ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>` : ''}
           </div>
         </div>
+        
         <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
           <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
           ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
@@ -339,11 +344,26 @@ function renderRecipes() {
           ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
           ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
         </div>
+        
         ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
+
+        <!-- 🛒 SECÇÃO DE INGREDIENTES SEMPRE VISÍVEL -->
+        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
+          <div style="margin-bottom:4px;">
+            <b>🛒 Ingredientes necessários:</b>
+            <span style="color:#555;">
+              ${r.ings && typeof r.ings === 'string' ? r.ings : ''}
+              ${r.ings && Array.isArray(r.ings) ? r.ings.map(i => `${i.name} (${i.qty}${i.unit})`).join(', ') : ''}
+              ${!r.ings || (Array.isArray(r.ings) && r.ings.length === 0) ? 'Peito de frango, vegetais e temperos básicos a gosto.' : ''}
+            </span>
+          </div>
+          ${r.steps ? `<div><b>👩‍🍳 Modo de Fazer:</b> <span style="color:#555;">${r.steps}</span></div>` : ''}
+        </div>
+
         ${r.bimby || r.airfryer ? `
-          <div style="background:#f8f9fa; padding:8px; font-size:12px; border-radius:4px; margin-top:8px; border-top:1px dashed #eee; color:#555;">
-            ${r.bimby ? `<b>Bimby:</b> ${r.bimby}<br>` : ''}
-            ${r.airfryer ? `<b>Airfryer:</b> ${r.airfryer}` : ''}
+          <div style="background:#eefaf6; padding:8px; font-size:12px; border-radius:4px; margin-top:8px; border:1px solid #d1ebd9; color:#2b573e;">
+            ${r.bimby ? `<b>🤖 Instruções Bimby:</b> ${r.bimby}<br>` : ''}
+            ${r.airfryer ? `<b>🍟 Instruções Airfryer:</b> ${r.airfryer}` : ''}
           </div>
         ` : ''}
       </div>
@@ -353,9 +373,11 @@ function renderRecipes() {
 
 function renderPantry() {
   const groups = {};
-  S.pantryStock.forEach(item => {
+  
+  // Agrupa os itens guardando com precisão o seu índice de mapeamento do array real
+  S.pantryStock.forEach((item, index) => {
     if (!groups[item.cat]) groups[item.cat] = [];
-    groups[item.cat].push(item);
+    groups[item.cat].push({ ...item, realIndex: index });
   });
 
   return `
@@ -364,21 +386,19 @@ function renderPantry() {
     ${Object.keys(groups).map(cat => `
       <div style="margin-bottom:20px;">
         <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">${cat}</b>
-        ${groups[cat].map(item => {
-          const globalIdx = S.pantryStock.findIndex(x => x.name === item.name);
-          return `
-            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
-              <span style="text-decoration: ${item.has ? 'none' : 'line-through'}; color: ${item.has ? '#333' : '#aaa'}; font-weight:600; font-size:13px;">${item.name}</span>
-              <button onclick="togglePantry(${globalIdx})" style="background:${item.has ? '#28a745':'#dc3545'}; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-                ${item.has ? '✅ Tenho' : '❌ Falta'}
-              </button>
-            </div>
-          `;
-        }).join('')}
+        ${groups[cat].map(item => `
+          <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <span style="text-decoration: ${item.has ? 'none' : 'line-through'}; color: ${item.has ? '#333' : '#aaa'}; font-weight:600; font-size:13px;">${item.name}</span>
+            <button onclick="togglePantry(${item.realIndex})" style="background:${item.has ? '#28a745':'#dc3545'}; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${item.has ? '✅ Tenho' : '❌ Falta'}
+            </button>
+          </div>
+        `).join('')}
       </div>
     `).join('')}
   `;
 }
+
 /* app.js — PARTE 6 */
 function renderShopping() {
   const missingFromPantry = S.pantryStock.filter(x => !x.has);
