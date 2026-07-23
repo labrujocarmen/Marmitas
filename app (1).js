@@ -1,10 +1,9 @@
-/* app.js — Controlador Principal Unificado e Corrigido */
+/* app.js — Versão Final com Proteção Anti-Ecrã em Branco */
 'use strict';
 
-// Sugestões prontas com Bimby, Airfryer e Macros
 const DEFAULT_RECIPES = [
   { id: 'sug_1', name: 'Frango de Caril Saudável', cat: 'frango', volume: 2, bimby: 'Pique a cebola 5 seg/vel 5. Refogue com azeite 3 min/120°C/vel 1.', airfryer: 'Não aplicável', calories: 380, protein: 40, isSuggestion: true, ings: [{name:'Peito de Frango', qty: 500, unit:'g'}] },
-  { id: 'sug_2', name: 'Almôndegas de Vaca no Forno', cat: 'bovina', volume: 2, bimby: 'Pique a carne se necessário.', airfryer: 'Cozinhe a 180°C por 12-15 minutos.', calories: 420, protein: 35, isSuggestion: true, ings: [{name:'Carne Picada Vaca', qty: 400, unit:'g'}] },
+  { id: 'sug_2', name: 'Almôndegas de Vaca no Forno', cat: 'bovina', volume: 2, bimby: 'Pique a carne se necessário.', airfryer: 'Cozinhe a 180°C por 12-15 minutes.', calories: 420, protein: 35, isSuggestion: true, ings: [{name:'Carne Picada Vaca', qty: 400, unit:'g'}] },
   { id: 'sug_3', name: 'Bacalhau Espiritual Light', cat: 'peixe', volume: 2, bimby: 'Faça o molho branco na velocidade 4 a 90°C.', airfryer: 'Gratine a 200°C por 8 minutos.', calories: 310, protein: 28, isSuggestion: true, ings: [{name:'Bacalhau Desfiado', qty: 400, unit:'g'}] }
 ];
 
@@ -33,23 +32,44 @@ function defaultState() {
 }
 
 function initAppState() {
-  const saved = localStorage.getItem('Marmitas_Pro_State_V3');
-  S = saved ? JSON.parse(saved) : defaultState();
+  // Usamos uma chave totalmente nova para ignorar o histórico corrompido do telemóvel
+  const saved = localStorage.getItem('Marmitas_Pro_Final_v1');
+  if (saved) {
+    try { 
+      S = JSON.parse(saved); 
+    } catch(e) { 
+      S = defaultState(); 
+    }
+  } else {
+    S = defaultState();
+  }
+  
+  // Salvaguardas obrigatórias contra propriedades em falta (Evita ecrã em branco)
+  if (!S || typeof S !== 'object') S = defaultState();
+  if (!S.myRecipes) S.myRecipes = [];
+  if (!S.selectedLunches) S.selectedLunches = [];
+  if (!S.pantryStock) S.pantryStock = [];
+  if (!S.shoppingList) S.shoppingList = [];
+  if (!S.invoices) S.invoices = [];
+  if (!S.instagramInspirations) S.instagramInspirations = [];
+  if (!S.tab) S.tab = 'dashboard';
+
   render();
 }
 
 function save() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_State_V3', JSON.stringify(S)), 300);
+  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_Final_v1', JSON.stringify(S)), 300);
 }
 
 function getAllRecipes() {
-  return [...S.myRecipes, ...DEFAULT_RECIPES];
+  return [...(S.myRecipes || []), ...DEFAULT_RECIPES];
 }
 
 function monthSpend() {
   const ym = new Date().toISOString().slice(0,7);
-  return S.invoices.filter(i => i.date && i.date.startsWith(ym)).reduce((sum, i) => sum + i.total, 0);
+  if (!S.invoices) return 0;
+  return S.invoices.filter(i => i && i.date && i.date.startsWith(ym)).reduce((sum, i) => sum + i.total, 0);
 }
 
 /* ===================== FUNÇÕES DE AÇÃO GLOBAIS ===================== */
@@ -96,7 +116,6 @@ window.toggleShoppingItem = function(id) {
   if (item) { 
     item.done = !item.done; 
     save(); 
-    // Pequeno atraso visual sem dar re-render completo para a checkbox não fugir do toque
     setTimeout(render, 200);
   }
 };
@@ -188,9 +207,3 @@ function renderShopping() {
       <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Adicionar Artigo</button>
     </div>
     
-    <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">🍱 Ingredientes para as Marmitas Semanais:</b>
-    <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; margin-bottom:20px;">
-      <ul style="padding-left:15px; margin:0; font-size:14px; color:#333;">
-        ${S.selectedLunches.map(id => {
-          const r = getAllRecipes().find(x => x.id === id);
-          if(!r || !r.ings) return '';
