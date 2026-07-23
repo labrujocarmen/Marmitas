@@ -501,29 +501,6 @@ function renderInstagram() {
   `;
 }
 
-function render() {
-  const root = document.getElementById('app-root') || document.body;
-  if (!root) return;
-
-  let view = renderDashboard();
-  if (S.tab === 'recipes') view = renderRecipes();
-  if (S.tab === 'pantry') view = renderPantry();
-  if (S.tab === 'shopping') view = renderShopping();
-  if (S.tab === 'instagram') view = renderInstagram();
-
-  root.innerHTML = `
-    <nav style="display:grid; grid-template-columns: repeat(5, 1fr); background:#111; color:#fff; font-size:11px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
-      <div onclick="switchTab('dashboard')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
-      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Livro</div>
-      <div onclick="switchTab('pantry')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Stock</div>
-      <div onclick="switchTab('shopping')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
-      <div onclick="switchTab('instagram')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
-    </nav>
-    <div style="padding:15px; max-width:600px; margin:0 auto; font-family:sans-serif; background:#f8f9fa; min-height:100vh; box-sizing:border-box;">
-      ${view}
-    </div>
-  `;
-}
 
 document.addEventListener('DOMContentLoaded', initAppState);
 if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
