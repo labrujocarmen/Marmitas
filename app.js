@@ -399,7 +399,6 @@ function renderRecipes() {
   `;
 }
 
-
 function renderPantry() {
   const groups = {};
   S.pantryStock.forEach(item => {
