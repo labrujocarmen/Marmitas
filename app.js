@@ -145,33 +145,53 @@ window.registerInvoice = function() {
 window.generateWeeklyMenu = function() {
   const all = getAllRecipes();
   if (all.length === 0) return;
-  // Mistura e escolhe 4 pratos de sugestão aleatórios
-  const shuffled = [...all].sort(() => 0.5 - Math.random());
-  S.selectedLunches = shuffled.slice(0, 4).map(r => r.id);
-  save(); render();
-  alert("✨ Menu da semana gerado com sucesso!");
-};
-
-// Função para Incluir Nova Receita ou Alterar Existente
-window.addNewRecipe = function() {
-  const name = prompt("Nome da Receita:");
-  if (!name) return;
-  const cat = prompt("Categoria (ex: Almoço/Marmita, Lanches):", "Almoço/Marmita") || "Almoço/Marmita";
-  const bimby = prompt("Modo Bimby (deixe em branco se não aplicável):") || "";
-  const airfryer = prompt("Modo Airfryer (deixe em branco se não aplicável):") || "";
   
-  const newRec = { id: 'my_' + Date.now(), name, cat, bimby, airfryer, isSuggestion: false, ings: [] };
-  S.myRecipes.push(newRec);
-  save(); render();
+  // Separa as refeições por tipo de proteína para garantir um menu misto real
+  const frangos = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+  const carnes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão') || r.name.toLowerCase().includes('pato')));
+  const peixes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+  const lanches = all.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+
+  let escolhaAlmocos = [];
+  
+  // Sorteia 2 pratos de frango
+  if (frangos.length >= 2) {
+    const fSh = [...frangos].sort(() => 0.5 - Math.random());
+    escolhaAlmocos.push(fSh[0].id, fSh[1].id);
+  } else if (frangos.length > 0) {
+    escolhaAlmocos.push(frangos[0].id);
+  }
+
+  // Sorteia 1 pratos de carne vermelha/limpa
+  if (carnes.length >= 1) {
+    const cSh = [...carnes].sort(() => 0.5 - Math.random());
+    escolhaAlmocos.push(cSh[0].id);
+  }
+
+  // Sorteia 1 prato de peixe saudavel
+  if (peixes.length >= 1) {
+    const pSh = [...peixes].sort(() => 0.5 - Math.random());
+    escolhaAlmocos.push(pSh[0].id);
+  }
+
+  // Preenche os lanches em falta no teu calendário de segunda a sexta
+  if (lanches.length >= 2) {
+    const lSh = [...lanches].sort(() => 0.5 - Math.random());
+    S.selectedSnacks = [lSh[0].id, lSh[1].id, lSh[0].id, lSh[1].id, lSh[0].id];
+  } else if (lanches.length > 0) {
+    S.selectedSnacks = Array(5).fill(lanches[0].id);
+  }
+
+  // Baralha os 4 almoços escolhidos para não ficarem sempre na mesma ordem de dias
+  if (escolhaAlmocos.length > 0) {
+    S.selectedLunches = escolhaAlmocos.sort(() => 0.5 - Math.random());
+  }
+
+  save(); 
+  render();
+  alert("✨ Menu da semana gerado com sucesso (Almoços e Lanches mistos)!");
 };
 
-window.deleteCustomRecipe = function(id) {
-  if (confirm("Tem a certeza que deseja apagar esta receita?")) {
-    S.myRecipes = S.myRecipes.filter(r => r.id !== id);
-    S.selectedLunches = S.selectedLunches.filter(x => x !== id);
-    save(); render();
-  }
-};
 
 // O Instagram como no modelo antigo: Guarda o Nome, Categoria e Link
 window.addInstagramLink = function() {
