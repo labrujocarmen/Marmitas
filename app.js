@@ -364,23 +364,71 @@ function renderDashboard() {
 function renderRecipes() {
   const all = getAllRecipes();
   
-  // Filtra as receitas em tempo real com base na barra de pesquisa
+  // Garante que existe um filtro de categoria na memória (por padrão 'todos')
+  if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
+
+  // 1. Aplica o filtro da barra de pesquisa por texto
   const query = (S.searchQuery || '').toLowerCase().trim();
-  const filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+  let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+
+  // 2. Aplica a separação inteligente por proteínas e lanches que solicitou
+  const currentF = S.currentRecipeFilter;
+  if (currentF !== 'todos') {
+    if (currentF === 'frango') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+    } else if (currentF === 'carne') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão')));
+    } else if (currentF === 'peixe') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+    } else if (currentF === 'lanches') {
+      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+    }
+  }
+
+  // Ações internas da barra de pesquisa e dos botões de filtro
+  window.setRecipeFilter = function(filterName) {
+    S.currentRecipeFilter = filterName;
+    save(); render();
+  };
+
+  window.executeSearch = function(txt) {
+    S.searchQuery = txt;
+    save(); render();
+    setTimeout(() => {
+      const input = document.getElementById('recipe-search-bar');
+      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
+    }, 50);
+  };
 
   return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
-      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Incluir Receita</button>
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Receita</button>
     </div>
-    
+
+    <!-- 🔍 BARRA DE PESQUISA SIMPLES POR TEXTO -->
+    <div style="margin-bottom:12px;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    <!-- 🏷️ BOTÕES DE SEPARAÇÃO POR ABAS -->
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
+      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍗 Frango</button>
+      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
+      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
+      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
+    </div>
+
+    ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
+
     ${filtered.map(r => `
       <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
           <div style="display:flex; gap:5px;">
-            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id)?'#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-              ${S.selectedLunches.includes(r.id) ? 'Remover' : 'Escolher'}
+            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${S.selectedLunches.includes(r.id) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
             </button>
             ${!r.isSuggestion && !r.isFromInstagram ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>` : ''}
           </div>
