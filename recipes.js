@@ -1,7 +1,6 @@
-/* recipes.js */
+/* recipes.js - Versão Simplificada (Sem preços por ingrediente) */
 const CATS = { bovina:'Carne Bovina', frango:'Frango', peixe:'Peixe', porco:'Porco', peru:'Peru', veg:'Vegetariana' };
 const DTYPES = { wrap:'Wraps', tosta:'Tostas', burger:'Hambúrguer', sopa:'Sopas', omelete:'Omeletes' };
-const STORES = { lidl:'Lidl', continente:'Continente', mercadona:'Mercadona', pingodoce:'Pingo Doce', aldi:'Aldi' };
 const SEASONS = { todo:'Todo o ano', primavera:'Primavera', verao:'Verão', outono:'Outono', inverno:'Inverno' };
 const ICAT = {
   carnes:'🥩 Carnes', horti:'🥦 Hortifrúti', desp:'🗄️ Despensa',
@@ -16,39 +15,6 @@ function currentSeason() {
   if ([3,4,5].includes(m)) return 'primavera';
   if ([6,7,8].includes(m)) return 'verao';
   return 'outono';
-}
-
-/* ---- Preços ---- */
-function bestPrice(name, ingredients) {
-  const key = name.toLowerCase().trim();
-  const ing = ingredients.find(i => i.name.toLowerCase() === key);
-  if (!ing || !ing.prices) return null;
-  const vals = Object.values(ing.prices).filter(v => v !== null && v > 0);
-  return vals.length ? Math.min(...vals) : null;
-}
-
-function cheapestStore(name, ingredients) {
-  const key = name.toLowerCase().trim();
-  const ing = ingredients.find(i => i.name.toLowerCase() === key);
-  if (!ing || !ing.prices) return null;
-  let best = null, bestS = null;
-  Object.entries(ing.prices).forEach(([s, v]) => {
-    if (v && v > 0 && (best === null || v < best)) { best = v; bestS = s; }
-  });
-  return bestS;
-}
-
-function ingCost(ing, ingredients) {
-  const p = bestPrice(ing.name, ingredients);
-  return p !== null ? p * ing.qty : 0;
-}
-
-function recipeCost(recipe, ingredients) {
-  return recipe.ings.reduce((s, i) => s + ingCost(i, ingredients), 0);
-}
-
-function recipeCostPerServing(recipe, ingredients) {
-  return recipeCost(recipe, ingredients) / Math.max(1, recipe.servings);
 }
 
 /* ---- Gerador automático ---- */
@@ -107,35 +73,43 @@ function generateDinners(dinners, weeks, currentWeek, count) {
 
 /* ---- Render helpers ---- */
 function fmt(n) { return '€' + (Math.round(n * 100) / 100).toFixed(2); }
-function fmtMin(min) {
-  const h = Math.floor(min / 60), m = Math.round(min % 60);
-  return h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`;
-}
 
-function renderRecipeCard(r, ingredients, opts = {}) {
-  const cost = recipeCostPerServing(r, ingredients);
+function renderRecipeCard(r, opts = {}) {
   const catKey = r.cat || '';
+  const volumeTag = r.volume ? `<span class="tag" style="background:#6c757d; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px;">📚 Vol. ${r.volume}</span>` : '';
+  const bimbyBadge = r.bimby ? `<span class="tag" style="background:#20c997; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px;">🤖 Bimby</span>` : '';
+  const airfryerBadge = r.airfryer ? `<span class="tag" style="background:#fd7e14; color:#fff; font-size:11px; padding:2px 6px; border-radius:4px;">🍟 Airfryer</span>` : '';
+  
   return `
-  <div class="recipe-card">
-    <div class="row between">
-      <span class="name">${r.name}</span>
-      <div class="row" style="gap:5px;">
-        <button class="x-btn" style="color:${r.fav?'#E3A23B':'#c8c2a4'}; font-size:19px;"
+  <div class="recipe-card" style="border-left: 4px solid #007bff; margin-bottom: 12px; background:#fff; padding:15px; border-radius:8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div class="row between" style="display:flex; justify-content:space-between; align-items:center;">
+      <span class="name" style="font-weight:bold; font-size:16px; color:#333;">${r.name}</span>
+      <div class="row" style="display:flex; gap:5px; align-items:center;">
+        <button class="x-btn" style="background:none; border:none; cursor:pointer; color:${r.fav?'#E3A23B':'#c8c2a4'}; font-size:19px;"
           data-fav="${r.id}" data-kind="${opts.kind||'lunch'}">★</button>
-        ${r.cat ? `<span class="tag cat-${catKey}">${(CATS[catKey]||DTYPES[r.type]||'')}</span>` : ''}
+        ${r.cat ? `<span class="tag" style="background:#e9ecef; padding:2px 6px; border-radius:4px; font-size:11px;">${(CATS[catKey]||DTYPES[r.type]||'')}</span>` : ''}
       </div>
     </div>
-    <div class="tags-row">
-      <span class="tag">${r.freezes?'❄️ Congela':'🚫 Não congela'}</span>
-      <span class="tag">⏱️ ${r.prep}min</span>
-      ${r.oven?`<span class="tag">🔥 ${r.oven}min forno</span>`:''}
-      ${r.pressure?`<span class="tag">💨 ${r.pressure}min pressão</span>`:''}
-      <span class="tag">📶 ${r.diff}</span>
-      ${r.season&&r.season!=='todo'?`<span class="tag gold">🌱 ${SEASONS[r.season]}</span>`:''}
-      <span class="tag mono">${fmt(cost)}/porção</span>
+    
+    <div class="tags-row" style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+      ${volumeTag}
+      <span class="tag" style="background:#e2f0d9; font-size:11px; padding:2px 6px; border-radius:4px;">${r.freezes?'❄️ Congela':'🚫 Consumir fresco'}</span>
+      <span class="tag" style="background:#f8f9fa; font-size:11px; padding:2px 6px; border-radius:4px;">⏱️ ${r.prep || 0}min</span>
+      ${r.calories ? `<span class="tag" style="background:#fff3cd; font-size:11px; padding:2px 6px; border-radius:4px;">🔥 ${r.calories} kcal</span>` : ''}
+      ${r.protein ? `<span class="tag" style="background:#d1ecf1; font-size:11px; padding:2px 6px; border-radius:4px;">💪 P: ${r.protein}g</span>` : ''}
+      ${bimbyBadge} ${airfryerBadge}
     </div>
-    <div class="row" style="margin-top:9px; gap:6px;">
-      <button class="btn sm olive" data-add="${r.id}" data-kind="${opts.kind||'lunch'}">+ Adicionar à semana</button>
+
+    <div class="recipe-details-drawer" id="drawer-${r.id}" style="background:#f8f9fa; padding:12px; font-size:13px; margin-top:10px; border-radius:6px; display:none; border: 1px solid #eee;">
+      ${r.bimby ? `<p style="margin:4px 0;"><b>🤖 Modo Bimby:</b> ${r.bimby}</p>` : ''}
+      ${r.airfryer ? `<p style="margin:4px 0;"><b>🍟 Modo Airfryer:</b> ${r.airfryer}</p>` : ''}
+      ${r.ingredients && r.ingredients.length ? `<p style="margin:4px 0;"><b>🛒 Ingredientes:</b> ${r.ingredients.map(i => `${i.name} (${i.qty}${i.unit})`).join(', ')}</p>` : ''}
+      ${r.steps ? `<p style="margin:4px 0; color:#555;"><b>👩‍🍳 Passo a Passo:</b> ${r.steps}</p>` : ''}
+    </div>
+
+    <div class="row" style="margin-top:12px; display:flex; justify-content: space-between;">
+      <button class="btn sm olive" data-add="${r.id}" data-kind="${opts.kind||'lunch'}" style="background:#28a745; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">+ Adicionar à semana</button>
+      <button class="btn sm" style="background:#f0f0f0; color:#333; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;" onclick="const el=document.getElementById('drawer-${r.id}'); el.style.display = el.style.display === 'none' ? 'block' : 'none'">📖 Ver Detalhes</button>
     </div>
   </div>`;
 }
