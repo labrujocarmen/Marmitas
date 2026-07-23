@@ -479,28 +479,5 @@ function render() {
 document.addEventListener('DOMContentLoaded', initAppState);
 if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
 
-function renderInstagram() {
-  return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">📸 Links do Instagram</h3>
-      <button onclick="addInstagramLink()" style="background:#d62976; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">🔗 Guardar Link</button>
-    </div>
-    
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee;">
-      ${S.instagramInspirations.map(item => `
-        <div style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-size:14px; color:#333;">
-            <b>${item.name}</b> - <span style="color:#6c757d;">${item.category}</span> - 
-            <a href="${item.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none;">Link</a>
-          </div>
-          <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>
-        </div>
-      `).join('')}
-      ${S.instagramInspirations.length === 0 ? '<p style="color:#888; font-size:13px; margin:0; padding:10px 0;">Nenhuma inspiração guardada. Clica em "Guardar Link".</p>' : ''}
-    </div>
-  `;
-}
-
-
 document.addEventListener('DOMContentLoaded', initAppState);
 if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
