@@ -1,4 +1,4 @@
-/* app.js — Versão Final com Proteção Anti-Ecrã em Branco */
+/* app.js — PARTE 1 */
 'use strict';
 
 const DEFAULT_RECIPES = [
@@ -32,19 +32,12 @@ function defaultState() {
 }
 
 function initAppState() {
-  // Usamos uma chave totalmente nova para ignorar o histórico corrompido do telemóvel
   const saved = localStorage.getItem('Marmitas_Pro_Final_v1');
   if (saved) {
-    try { 
-      S = JSON.parse(saved); 
-    } catch(e) { 
-      S = defaultState(); 
-    }
+    try { S = JSON.parse(saved); } catch(e) { S = defaultState(); }
   } else {
     S = defaultState();
   }
-  
-  // Salvaguardas obrigatórias contra propriedades em falta (Evita ecrã em branco)
   if (!S || typeof S !== 'object') S = defaultState();
   if (!S.myRecipes) S.myRecipes = [];
   if (!S.selectedLunches) S.selectedLunches = [];
@@ -53,7 +46,6 @@ function initAppState() {
   if (!S.invoices) S.invoices = [];
   if (!S.instagramInspirations) S.instagramInspirations = [];
   if (!S.tab) S.tab = 'dashboard';
-
   render();
 }
 
@@ -72,7 +64,6 @@ function monthSpend() {
   return S.invoices.filter(i => i && i.date && i.date.startsWith(ym)).reduce((sum, i) => sum + i.total, 0);
 }
 
-/* ===================== FUNÇÕES DE AÇÃO GLOBAIS ===================== */
 window.switchTab = function(tab) { S.tab = tab; render(); };
 
 window.registerInvoice = function() {
@@ -89,7 +80,6 @@ window.addNewRecipe = function() {
   const airfryer = prompt("Modo Airfryer (deixe em branco se não aplicável):") || "";
   const calories = parseInt(prompt("Calorias por porção:", "0")) || 0;
   const protein = parseInt(prompt("Proteínas (g):", "0")) || 0;
-  
   const newRec = { id: 'my_' + Date.now(), name, bimby, airfryer, calories, protein, isSuggestion: false, ings: [] };
   S.myRecipes.push(newRec);
   save(); render();
@@ -98,26 +88,22 @@ window.addNewRecipe = function() {
 window.addInstagramLink = function() {
   const link = prompt("Cole o link da publicação do Instagram:");
   if (!link) return;
-  const desc = prompt("Nota rápida (ex: Ideia de frango crocante):") || "Inspiração sem título";
+  const desc = prompt("Nota rápida:") || "Inspiração sem título";
   S.instagramInspirations.push({ id: 'ig_'+Date.now(), link, desc });
   save(); render();
 };
-
+/* app.js — PARTE 2 */
 window.addCustomShoppingItem = function() {
   const name = prompt("O que precisas de comprar para casa?");
   if (!name) return;
-  const cat = prompt("Categoria (ex: Limpeza, Gato, Mercearia):", "Geral") || "Geral";
+  const cat = prompt("Categoria:", "Geral") || "Geral";
   S.shoppingList.push({ id: 'item_'+Date.now(), name, cat, done: false });
   save(); render();
 };
 
 window.toggleShoppingItem = function(id) {
   const item = S.shoppingList.find(i => i.id === id);
-  if (item) { 
-    item.done = !item.done; 
-    save(); 
-    setTimeout(render, 200);
-  }
+  if (item) { item.done = !item.done; save(); setTimeout(render, 200); }
 };
 
 window.togglePantry = function(index) {
@@ -132,7 +118,6 @@ window.toggleSelectRecipe = function(id) {
   save(); render();
 };
 
-/* ===================== COMPONENTES VISUAIS (HTML) ===================== */
 function renderDashboard() {
   return `
     <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
@@ -172,7 +157,6 @@ function renderRecipes() {
           <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.isSuggestion ? '💡 Sugestão' : '⭐ Minha'}</span>
           ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
           ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
-          ${r.calories ? `<span style="background:#fff3cd; color:#856404; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🔥 ${r.calories} kcal</span>` : ''}
         </div>
         ${r.bimby || r.airfryer ? `
           <div style="background:#f8f9fa; padding:8px; font-size:12px; border-radius:4px; margin-top:8px; border-top:1px dashed #eee; color:#555;">
@@ -188,10 +172,9 @@ function renderRecipes() {
 function renderPantry() {
   return `
     <h3 style="margin-top:0; color:#333;">🗄️ O que tenho em casa</h3>
-    <p style="color:#6c757d; font-size:12px; margin-bottom:15px;">Gere o stock básico da tua dispensa antes de cozinhares.</p>
     ${S.pantryStock.map((item, idx) => `
-      <div style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; background:#fff; padding:10px; border-radius:6px; margin-bottom:6px; border:1px solid #f0f0f0;">
-        <span style="text-decoration: ${item.has ? 'none' : 'line-through'}; color: ${item.has ? '#333' : '#aaa'}; font-weight:600; font-size:14px;">${item.name}</span>
+      <div style="padding:10px; border-radius:6px; margin-bottom:6px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
+        <span style="text-decoration: ${item.has ? 'none' : 'line-through'}; color: ${item.has ? '#333' : '#aaa'}; font-weight:600;">${item.name}</span>
         <button onclick="togglePantry(${idx})" style="background:${item.has ? '#28a745':'#6c757d'}; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">
           ${item.has ? '✅ Tenho' : '❌ Falta'}
         </button>
@@ -204,6 +187,58 @@ function renderShopping() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Adicionar Artigo</button>
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo</button>
     </div>
-    
+    <div style="background:#fff; padding:5px 12px; border-radius:8px; border:1px solid #eee;">
+      ${S.shoppingList.map(item => `
+        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="transform: scale(1.2); cursor:pointer;"> 
+          <span style="text-decoration:${item.done ? 'line-through' : 'none'}; color:${item.done ? '#aaa' : '#333'}; font-weight:500;">${item.name}</span> 
+          <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:auto;">${item.cat}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderInstagram() {
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333;">📸 Links do Instagram</h3>
+      <button onclick="addInstagramLink()" style="background:#d62976; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">🔗 Link</button>
+    </div>
+    ${S.instagramInspirations.map(item => `
+      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid #ddd;">
+        <p style="margin:0 0 8px 0; font-weight:bold; color:#333;">${item.desc}</p>
+        <a href="${item.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none; font-size:13px;">➡️ Abrir no Instagram</a>
+      </div>
+    `).join('')}
+  `;
+}
+
+function render() {
+  const root = document.getElementById('app-root') || document.body;
+  if (!root) return;
+  let view = renderDashboard();
+  if (S.tab === 'recipes') view = renderRecipes();
+  if (S.tab === 'pantry') view = renderPantry();
+  if (S.tab === 'shopping') view = renderShopping();
+  if (S.tab === 'instagram') view = renderInstagram();
+
+  root.innerHTML = `
+    <nav style="display:grid; grid-template-columns: repeat(5, 1fr); background:#111; color:#fff; font-size:11px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
+      <div onclick="switchTab('dashboard')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
+      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Livro</div>
+      <div onclick="switchTab('pantry')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Stock</div>
+      <div onclick="switchTab('shopping')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
+      <div onclick="switchTab('instagram')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
+    </nav>
+    <div style="padding:15px; max-width:600px; margin:0 auto; font-family:sans-serif; background:#f8f9fa; min-height:100vh; box-sizing:border-box;">
+      ${view}
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', initAppState);
+if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
+
