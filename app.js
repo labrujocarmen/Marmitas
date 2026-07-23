@@ -209,82 +209,139 @@ window.toggleSelectRecipe = function(id) {
   else S.selectedLunches.push(id);
   save(); render();
 };
-/* app.js — PARTE 5 */
 function renderDashboard() {
   const totalGasto = monthSpend();
   
-  // Métricas Calculadas para as vossas 12 Marmitas (6 Tuas + 6 Marido)
-  const carneNecessaria = ((150 * 6) + (200 * 6)) / 1000; // Total em kg
-  const hidratosNecessarios = ((80 * 6) + (100 * 6)) / 1000; // Total em kg
+  // Impede falhas caso as configurações das macros estejam vazias
+  if (!S.settings) S.settings = {};
+  if (!S.settings.kcalTu) S.settings.kcalTu = 1200;
+  if (!S.settings.kcalEle) S.settings.kcalEle = 1800;
+  if (!S.settings.protTu) S.settings.protTu = 135;
+  if (!S.settings.protEle) S.settings.protEle = 200;
+
+  // Recalcula o peso em kg com base nas macros ativas
+  const carneNecessaria = ((S.settings.protTu * 6) + (S.settings.protEle * 6)) / 1000;
+  const hidratosNecessarios = ((80 * 6) + (100 * 6)) / 1000;
+
+  // NOVO MOTOR DO GERADOR: Sorteia 2 Frangos, 1 Carne, 1 Peixe e 2 Lanches sem repetir à toa
+  window.generateWeeklyMenu = function() {
+    const all = getAllRecipes();
+    const frangos = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+    const carnes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão') || r.name.toLowerCase().includes('pato')));
+    const peixes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+    const lanches = all.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+
+    let escolha = [];
+    if (frangos.length >= 2) {
+      const fSh = [...frangos].sort(() => 0.5 - Math.random());
+      escolha.push(fSh[0].id, fSh[1].id);
+    }
+    if (carnes.length >= 1) {
+      const cSh = [...carnes].sort(() => 0.5 - Math.random());
+      escolha.push(cSh[0].id);
+    }
+    if (peixes.length >= 1) {
+      const pSh = [...peixes].sort(() => 0.5 - Math.random());
+      escolha.push(pSh[0].id);
+    }
+    
+    if (lanches.length >= 2) {
+      const lSh = [...lanches].sort(() => 0.5 - Math.random());
+      S.selectedSnacks = [lSh[0].id, lSh[1].id];
+    }
+
+    // Se o sorteio misto correr bem, baralha os 4 pratos finais pelos dias
+    if(escolha.length > 0) {
+      S.selectedLunches = escolha.sort(() => 0.5 - Math.random());
+    }
+    save(); render();
+    alert("✨ Ementa Semanal Equilibrada Gerada (Frango, Carne, Peixe e Lanches)!");
+  };
+
+  // Botão solicitado para alterar as macros tuas e dele diretamente no ecrã
+  window.changeMacrosPrompt = function() {
+    S.settings.kcalTu = parseInt(prompt("As tuas Calorias Diárias (Kcal):", S.settings.kcalTu)) || 1200;
+    S.settings.protTu = parseInt(prompt("A tua Proteína por Marmita (g):", S.settings.protTu)) || 135;
+    S.settings.kcalEle = parseInt(prompt("Calorias Diárias Dele (Kcal):", S.settings.kcalEle)) || 1800;
+    S.settings.protEle = parseInt(prompt("Proteína Dele por Marmita (g):", S.settings.protEle)) || 200;
+    save(); render();
+  };
+
+  const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'];
+  const allRecs = getAllRecipes();
   
   return `
-    <!-- 🩸 BLOCO DE SAÚDE: ALIMENTAÇÃO LIPEDEMA -->
-    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE & LIPEDEMA</small>
-      <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">
-        Para controlar a inflamação e a retenção, foca em alimentos ricos em <b>potássio e antioxidantes</b>. 
-        Tenta incluir no teu stock semanal:
-      </p>
-      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥝 Kiwi / Frutos Vermelhos</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥑 Abacate / Espinafres</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥦 Brócolos / Beterraba</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🐟 Salmão / Sardinha</span>
-        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🫒 Azeite / Tomate</span>
+    <!-- 🩸 GUIA DE SAÚDE LIPEDEMA -->
+    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px;">
+      <small style="color:#c2185b; font-weight:bold; display:block;">%🩺 GUIA DE SAÚDE & LIPEDEMA</small>
+      <p style="margin:5px 0; font-size:12px; color:#555;">Alimentos ricos em potássio e antioxidantes anti-inflamatórios:</p>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;">
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Kiwi / Frutos Vermelhos / Abacate</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Espinafres / Brócolos / Tomate</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px;">Salmão / Sardinha / Azeite</span>
       </div>
     </div>
 
-    <!-- 📊 PAINEL DE METAS METABÓLICAS -->
-    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS DA FAMÍLIA</small>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
-          <b style="font-size:13px; color:#333; display:block;">👩‍🍳 A tua Ementa</b>
-          <span style="font-size:16px; font-weight:bold; color:#007bff;">1200 Kcal</span>
-          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🍗 120-150g Prot<br>🥦 40% Legumes<br>🍚 20% Hidratos</small>
+    <!-- PAINEL DE METAS E BOTAO EDITÁVEL DE MACROS -->
+    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <small style="color:#6c757d; font-weight:bold;">⚖️ METAS SEMANAIS DA FAMÍLIA</small>
+        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️ Alterar Macros</button>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <div style="background:#f1f3f5; padding:8px; border-radius:6px; text-align:center;">
+          <b style="font-size:12px; display:block;">👩‍🍳 Tu (${S.settings.kcalTu} Kcal)</b>
+          <span style="font-size:13px; font-weight:bold; color:#007bff;">${S.settings.protTu}g Proteína</span>
         </div>
-        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
-          <b style="font-size:13px; color:#333; display:block;">👨‍🦱 Marido (6 Marmitas)</b>
-          <span style="font-size:16px; font-weight:bold; color:#6f42c1;">1800 Kcal</span>
-          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🥩 200g Proteína<br>🥦 40% Legumes<br>🍚 100g Hidratos</small>
+        <div style="background:#f1f3f5; padding:8px; border-radius:6px; text-align:center;">
+          <b style="font-size:12px; display:block;">👨‍🦱 Marido (${S.settings.kcalEle} Kcal)</b>
+          <span style="font-size:13px; font-weight:bold; color:#6f42c1;">${S.settings.protEle}g Proteína</span>
         </div>
       </div>
     </div>
 
-    <!-- 🛒 GUIA DE COMPRAS EM MASSA -->
-    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">📦 GUIA DE COMPRAS DE MATÉRIA-PRIMA</small>
-      <p style="margin:5px 0 12px 0; font-size:12px; color:#666;">Para garantires <b>12 marmitas</b> variadas com 2 a 3 tipos de proteína diferentes:</p>
-      <div style="font-size:13px; color:#333; line-height:1.6;">
-        🔸 <b>Proteínas Totais:</b> Compra pelo menos <span style="color:#28a745; font-weight:bold;">${carneNecessaria.toFixed(1)} kg</span> de carne/peixe limpos.<br>
-        🔸 <b>Hidratos Totais:</b> Prepara aprox. <span style="color:#007bff; font-weight:bold;">${hidratosNecessarios.toFixed(1)} kg</span> de base (Arroz/Batata/Feijão).<br>
-        🔸 <b>Legumes Totais:</b> Garante uma proporção de 40% de vegetais ao vapor ou assados.
-      </div>
+    <!-- GUIA DE COMPRAS DE MATÉRIA-PRIMA -->
+    <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; font-size:12px; line-height:1.5;">
+      <b>📦 MATÉRIA-PRIMA PARA AS 12 MARMITAS:</b><br>
+      🥩 Proteínas Totais: <span style="color:#28a745; font-weight:bold;">${carneNecessaria.toFixed(1)} kg</span> limpos.<br>
+      🍚 Hidratos Totais: <span style="color:#007bff; font-weight:bold;">${hidratosNecessarios.toFixed(1)} kg</span> de base.
     </div>
 
-    <!-- 💰 CONTROLO MONETÁRIO SIMPLIFICADO -->
-    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
-      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS REAIS REGISTADOS DESTE MÊS</small>
-      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura do Lidl / Continente / Mercadona</button>
+    <!-- CONTROLO FINANCEIRO -->
+    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:12px; border-radius:8px; margin-bottom:15px;">
+      <h3 style="margin:0; font-size:14px; color:#28a745;">Gasto Real do Mês: €${totalGasto.toFixed(2)}</h3>
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; margin-top:6px; font-size:12px;">Registar Talão</button>
     </div>
 
-    <!-- 🍱 SELEÇÃO SEMANAL -->
-    <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu Escolhido para a Semana</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu Aleatório</button>
+    <!-- CALENDÁRIO SEMANAL EXCLUSIVO DE SEGUNDA A SEXTA -->
+    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; color:#333; font-size:14px;">📅 Marmitas da Semana (Segunda a Sexta)</h3>
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">✨ Gerar Menu Bruto</button>
       </div>
-      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>' : ''}
-      <ul style="padding-left:20px; margin:0; font-size:14px;">
-        ${S.selectedLunches.map(id => {
-          const r = getAllRecipes().find(x => x.id === id);
-          return r ? `<li style="padding:4px 0; color:#333; font-weight:500;">${r.name}</li>` : '';
-        }).join('')}
-      </ul>
+      
+      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:12px; margin:0;">Clica em "Gerar Menu Bruto" para montar a semana.</p>' : ''}
+      
+      ${dias.map((dia, idx) => {
+        const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
+        const snackId = S.selectedSnacks ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
+        const lunchRec = allRecs.find(x => x.id === id ? id === lunchId : x.id === lunchId);
+        const snackRec = allRecs.find(x => x.id === id ? id === snackId : x.id === snackId);
+
+        return `
+          <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; font-size:13px;">
+            <b style="color:#007bff; display:block; margin-bottom:2px;">📅 ${dia}:</b>
+            <div style="padding-left:10px; color:#333;">
+              🍱 Almoço: <b>${lunchRec ? lunchRec.name : 'Não definido'}</b><br>
+              🥛 Lanche: <span style="color:#555;">${snackRec ? snackRec.name : 'Não definido'}</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
     </div>
   `;
 }
+
 
 
 function renderRecipes() {
