@@ -363,8 +363,8 @@ function renderDashboard() {
 
 function renderRecipes() {
   const all = getAllRecipes();
-  
-  // Garante que existe um filtro de categoria na memória (por padrão 'todos')
+
+    // Garante que existe um filtro de categoria na memória (por padrão 'todos')
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
 
   // 1. Aplica o filtro da barra de pesquisa por texto
