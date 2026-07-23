@@ -211,27 +211,81 @@ window.toggleSelectRecipe = function(id) {
 };
 /* app.js — PARTE 5 */
 function renderDashboard() {
+  const totalGasto = monthSpend();
+  
+  // Métricas Calculadas para as vossas 12 Marmitas (6 Tuas + 6 Marido)
+  const carneNecessaria = ((150 * 6) + (200 * 6)) / 1000; // Total em kg
+  const hidratosNecessarios = ((80 * 6) + (100 * 6)) / 1000; // Total em kg
+  
   return `
-    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
-      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS DESTE MÊS</small>
-      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${monthSpend().toFixed(2)}</h2>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%;">Registar Fatura Total</button>
+    <!-- 🩸 BLOCO DE SAÚDE: ALIMENTAÇÃO LIPEDEMA -->
+    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE & LIPEDEMA</small>
+      <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">
+        Para controlar a inflamação e a retenção, foca em alimentos ricos em <b>potássio e antioxidantes</b>. 
+        Tenta incluir no teu stock semanal:
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥝 Kiwi / Frutos Vermelhos</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥑 Abacate / Espinafres</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥦 Brócolos / Beterraba</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🐟 Salmão / Sardinha</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🫒 Azeite / Tomate</span>
+      </div>
     </div>
+
+    <!-- 📊 PAINEL DE METAS METABÓLICAS -->
+    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS DA FAMÍLIA</small>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
+          <b style="font-size:13px; color:#333; display:block;">👩‍🍳 A tua Ementa</b>
+          <span style="font-size:16px; font-weight:bold; color:#007bff;">1200 Kcal</span>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🍗 120-150g Prot<br>🥦 40% Legumes<br>🍚 20% Hidratos</small>
+        </div>
+        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
+          <b style="font-size:13px; color:#333; display:block;">👨‍🦱 Marido (6 Marmitas)</b>
+          <span style="font-size:16px; font-weight:bold; color:#6f42c1;">1800 Kcal</span>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🥩 200g Proteína<br>🥦 40% Legumes<br>🍚 100g Hidratos</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🛒 GUIA DE COMPRAS EM MASSA -->
+    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">📦 GUIA DE COMPRAS DE MATÉRIA-PRIMA</small>
+      <p style="margin:5px 0 12px 0; font-size:12px; color:#666;">Para garantires <b>12 marmitas</b> variadas com 2 a 3 tipos de proteína diferentes:</p>
+      <div style="font-size:13px; color:#333; line-height:1.6;">
+        🔸 <b>Proteínas Totais:</b> Compra pelo menos <span style="color:#28a745; font-weight:bold;">${carneNecessaria.toFixed(1)} kg</span> de carne/peixe limpos.<br>
+        🔸 <b>Hidratos Totais:</b> Prepara aprox. <span style="color:#007bff; font-weight:bold;">${hidratosNecessarios.toFixed(1)} kg</span> de base (Arroz/Batata/Feijão).<br>
+        🔸 <b>Legumes Totais:</b> Garante uma proporção de 40% de vegetais ao vapor ou assados.
+      </div>
+    </div>
+
+    <!-- 💰 CONTROLO MONETÁRIO SIMPLIFICADO -->
+    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
+      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS REAIS REGISTADOS DESTE MÊS</small>
+      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura do Lidl / Continente / Mercadona</button>
+    </div>
+
+    <!-- 🍱 SELEÇÃO SEMANAL -->
     <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <h3 style="margin:0; color:#333;">🍱 Menu da Semana</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu</button>
+        <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu Escolhido para a Semana</h3>
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu Aleatório</button>
       </div>
-      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:13px;">Nenhum prato escolhido. Clica em "Gerar Menu" ou escolhe no "Livro".</p>' : ''}
-      <ul style="padding-left:20px; margin:0;">
+      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>' : ''}
+      <ul style="padding-left:20px; margin:0; font-size:14px;">
         ${S.selectedLunches.map(id => {
           const r = getAllRecipes().find(x => x.id === id);
-          return r ? `<li style="padding:6px 0; color:#333; font-weight:500;">${r.name} <small style="color:#6c757d;">(${r.cat})</small></li>` : '';
+          return r ? `<li style="padding:4px 0; color:#333; font-weight:500;">${r.name}</li>` : '';
         }).join('')}
       </ul>
     </div>
   `;
 }
+
 
 function renderRecipes() {
   const all = getAllRecipes();
