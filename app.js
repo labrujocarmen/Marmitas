@@ -247,10 +247,13 @@ function renderDashboard() {
     render(); 
   };
 
+  const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+  const allRecs = getAllRecipes();
+
   return `
     <!-- 🩸 BLOCO DE SAÚDE: ALIMENTAÇÃO LIPEDEMA -->
     <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-      <small style="color:#c2185b; font-weight:bold; display:block;">%🩺 GUIA DE SAÚDE & LIPEDEMA</small>
+      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE & LIPEDEMA</small>
       <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">
         Para controlar a inflamação e a retenção, foca em alimentos ricos em <b>potássio e antioxidantes</b>. 
         Tenta incluir no teu stock semanal:
@@ -302,19 +305,38 @@ function renderDashboard() {
       <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura do Lidl / Continente / Mercadona</button>
     </div>
 
-    <!-- 🍱 SELEÇÃO SEMANAL -->
+    <!-- 🍱 SELEÇÃO SEMANAL COM DIAS DA SEMANA -->
     <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu Escolhido para a Semana</h3>
         <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu Aleatório</button>
       </div>
-      ${S.selectedLunches.length === 0 ? '<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>' : ''}
-      <ul style="padding-left:20px; margin:0; font-size:14px;">
-        ${S.selectedLunches.map(id => {
-          const r = getAllRecipes().find(x => x.id === id);
-          return r ? `<li style="padding:4px 0; color:#333; font-weight:500;">${r.name}</li>` : '';
-        }).join('')}
-      </ul>
+      
+      ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `
+        <p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>
+      ` : `
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+          ${dias.map((dia, idx) => {
+            const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
+            const snackId = S.selectedSnacks ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
+            
+            const lunchRec = allRecs.find(x => x.id === lunchId);
+            const snackRec = allRecs.find(x => x.id === snackId);
+
+            return `
+              <div style="padding:10px; background:#f8f9fa; border-radius:6px; border-left:4px solid #6f42c1; font-size:13px;">
+                <b style="color:#6f42c1; display:block; margin-bottom:4px; font-size:14px;">📅 ${dia}</b>
+                <div style="color:#222; margin-bottom:3px;">
+                  🍗 <b>Almoço:</b> ${lunchRec ? lunchRec.name : '<span style="color:#aaa;">Não definido</span>'}
+                </div>
+                <div style="color:#555;">
+                  🥪 <b>Lanche:</b> ${snackRec ? snackRec.name : '<span style="color:#aaa;">Não definido</span>'}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
     </div>
   `;
 }
