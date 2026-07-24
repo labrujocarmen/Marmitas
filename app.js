@@ -408,7 +408,7 @@ function renderRecipes() {
   const query = (S.searchQuery || '').toLowerCase().trim();
   let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
 
-    const currentF = S.currentRecipeFilter;
+      const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
     if (currentF === 'frango') {
       filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
@@ -420,7 +420,6 @@ function renderRecipes() {
       filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche' || r.cat.toLowerCase().includes('lanche'));
     }
   }
-
 
   window.setRecipeFilter = function(filterName) {
     S.currentRecipeFilter = filterName;
