@@ -385,7 +385,7 @@ function renderDashboard() {
         </div>
       `}
 
-      <!-- 💡 NOVA ZONA: IDEIAS EXTRA ESCOLHIDAS DO INSTA / INTERNET -->
+      <!-- 💡 IDEIAS EXTRA ESCOLHIDAS DO INSTA -->
       ${S.selectedInstagramExtras && S.selectedInstagramExtras.length > 0 ? `
         <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd;">
           <b style="color:#d62976; display:block; margin-bottom:8px; font-size:13px;">💡 Receitas Extra para Testar esta Semana:</b>
@@ -405,6 +405,7 @@ function renderDashboard() {
     </div>
   `;
 }
+
 
 
 function renderRecipes() {
