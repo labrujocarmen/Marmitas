@@ -1,34 +1,50 @@
-/* app.js — PARTE 1 ATUALIZADA (Ingredientes e Passos Completos) */
+/* app.js — VERSÃO COMPLETA E FUNCIONAL */
 'use strict';
 
 const DEFAULT_RECIPES = [
-  { id: 'f_desfiado', name: 'Frango desfiado tradicional', cat: 'Almoço/Marmita', bimby: 'Programe 5 seg/Vel 4 Invertida para desfiar o frango cozido.', airfryer: '', calories: 280, protein: 35, isSu[...] },
-  { id: 'f_mexicano', name: 'Frango mexicano', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 310, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Pimentões coloridos, Mil[...] }
+  { id: 'f_desfiado', name: 'Frango desfiado tradicional', cat: 'Almoço/Marmita', bimby: 'Programe 5 seg/Vel 4 Invertida para desfiar o frango cozido.', airfryer: '', calories: 280, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Sal, Água', steps: 'Cozinhe o frango e desfie.' },
+  { id: 'f_mexicano', name: 'Frango mexicano', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 310, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Pimentões coloridos, Milho, Cebola', steps: 'Refogue tudo junto.' },
+  { id: 'f_oriental', name: 'Frango oriental', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 330, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Molho de soja, Gengibre', steps: 'Salteie rapidamente.' },
+  { id: 'f_xadrez', name: 'Frango xadrez', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 340, protein: 36, isSuggestion: true, ings: 'Peito de Frango (500g), Pimenta, Castanha', steps: 'Refogue com os temperos.' },
+  { id: 'f_caril', name: 'Frango de caril', cat: 'Almoço/Marmita', bimby: 'Prepare o molho de caril na vel 2 a 90°C.', airfryer: '', calories: 350, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Caril, Leite de coco', steps: 'Cozinhe no molho.' },
+  { id: 'f_cremoso', name: 'Frango cremoso', cat: 'Almoço/Marmita', bimby: 'Misture o queijo creme na vel 4.', airfryer: '', calories: 290, protein: 33, isSuggestion: true, ings: 'Peito de Frango (500g), Queijo creme, Nata', steps: 'Refogue e tempere.' },
+  { id: 'f_strogonoff', name: 'Strogonoff saudável', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 300, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Cogumelos, Iogurte grego', steps: 'Faça o molho cremoso.' },
+  { id: 'f_mediterran', name: 'Frango mediterrânico', cat: 'Almoço/Marmita', bimby: '', airfryer: 'Cozinhe a 190°C por 15 min.', calories: 295, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Tomate, Azeitona', steps: 'Asse com temperos.' },
+  { id: 'f_mostarda', name: 'Frango mostarda', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 310, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Mostarda, Mel', steps: 'Marinada e cozinhe.' },
+  { id: 'f_limao', name: 'Frango com limão', cat: 'Almoço/Marmita', bimby: '', airfryer: 'Grelhe a 180°C por 12 min.', calories: 270, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Limão, Alho', steps: 'Grelhe com limão fresco.' }
+];
+
+const EXTRA_RECIPES = [
+  { id: 'm_feij_1', name: 'Frango grelhado + arroz + feijão preto + brócolos', cat: 'Almoço/Marmita', proteinType: 'frango', bimby: '', airfryer: 'Grelhe o frango a 180°C por 12 min.', isSuggestion: true, ings: 'Frango, arroz, feijão preto, brócolos' },
+  { id: 'm_feij_2', name: 'Picadinho de carne + arroz + feijão carioca + cenoura', cat: 'Almoço/Marmita', bimby: '', airfryer: '', isSuggestion: true, ings: 'Carne picada, arroz, feijão carioca, cenoura' },
+  { id: 'm_feij_3', name: 'Carne de panela + arroz + feijão vermelho + couve', cat: 'Almoço/Marmita', bimby: '', airfryer: '', isSuggestion: true, ings: 'Carne, arroz, feijão vermelho, couve' },
+  { id: 'm_feij_4', name: 'Almôndegas caseiras + arroz + feijão + feijão-verde', cat: 'Almoço/Marmita', bimby: 'Faça o molho na vel 2.', airfryer: 'Asse as almôndegas a 200°C por 10 min.', isSuggestion: true, ings: 'Carne, pão ralado, ovo, arroz, feijão' },
+  { id: 'm_feij_5', name: 'Frango desfiado + arroz + feijão tropeiro light', cat: 'Almoço/Marmita', bimby: 'Desfie o frango vel 4 invertida.', airfryer: '', isSuggestion: true, ings: 'Frango, arroz, feijão, linguiça' },
+  { id: 'm_feij_6', name: 'Salmão com arroz e legumes', cat: 'Almoço/Marmita', bimby: 'Cozinhe os legumes na Varoma.', airfryer: 'Cozinhe o salmão a 180°C por 10 min.', isSuggestion: true, ings: 'Salmão, arroz, legumes variados' },
+  { id: 'm_feij_7', name: 'Bife acebolado + arroz + feijão + abóbora assada', cat: 'Almoço/Marmita', bimby: '', airfryer: 'Asse a abóbora a 200°C por 15 min.', isSuggestion: true, ings: 'Bife, cebola, arroz, feijão, abóbora' },
+  { id: 'l_skyr', name: 'Iogurte Skyr + frutos vermelhos', cat: 'Lanches', bimby: '', airfryer: '', isSuggestion: true, ings: 'Skyr, frutos vermelhos' },
+  { id: 'l_queijo', name: 'Queijo fresco + tomate', cat: 'Lanches', bimby: '', airfryer: '', isSuggestion: true, ings: 'Queijo fresco, tomate, azeite' },
+  { id: 'l_atum', name: 'Sandes de atum + salada', cat: 'Lanches', bimby: '', airfryer: '', isSuggestion: true, ings: 'Atum, pão integral, salada, tomate' }
 ];
 
 let S = null;
 let saveTimer = null;
-/* app.js — PARTE 2 (Metade A) */
-const EXTRA_RECIPES = [
-  { id: 'm_feij_1', name: 'Frango grelhado + arroz + feijão preto + brócolos', cat: 'Almoço/Marmita', proteinType: 'frango', bimby: '', airfryer: 'Grelhe o frango a 180°C por 12 min.', isSuggestio[...] }
-];
 
-/* app.js — PARTE 3 */
 function getInitialPantry() {
   const list = [
     { name: 'Bife', cat: 'CARNE' }, { name: 'Costeletas de porco', cat: 'CARNE' }, { name: 'Hambúrguer', cat: 'CARNE' }, { name: 'Camarão', cat: 'CARNE' }, { name: 'Linguiça', cat: 'CARNE' },
     { name: 'Kiwi', cat: 'LEGUMES e FRUTAS' }, { name: 'Limão', cat: 'LEGUMES e FRUTAS' }, { name: 'Morango congelado', cat: 'LEGUMES e FRUTAS' }, { name: 'Melancia', cat: 'LEGUMES e FRUTAS' },
-    { name: 'Queijo ralado', cat: 'LATICÍNIOS' }, { name: 'Queijo camembert', cat: 'LATICÍNIOS' }, { name: 'Requeijão', cat: 'LATICÍNIOS' }, { name: 'Queijo para a quiche', cat: 'LATICÍNIOS' [...]
+    { name: 'Queijo ralado', cat: 'LATICÍNIOS' }, { name: 'Queijo camembert', cat: 'LATICÍNIOS' }, { name: 'Requeijão', cat: 'LATICÍNIOS' }, { name: 'Queijo para a quiche', cat: 'LATICÍNIOS' },
     { name: 'Desingordurante', cat: 'LIMPEZA' }, { name: 'Desentupidor', cat: 'LIMPEZA' }, { name: 'Sabão lavar roupa', cat: 'LIMPEZA' }, { name: 'Lixívia', cat: 'LIMPEZA' },
     { name: 'Massa de pizza', cat: 'CONGELADOS' }, { name: 'Batata congelada', cat: 'CONGELADOS' },
-    { name: 'Molho barbecue', cat: 'MOLHOS e TEMPEROS' }, { name: 'Azeite', cat: 'MOLHOS e TEMPEROS' }, { name: 'Alho em pó', cat: 'MOLHOS e TEMPEROS' }, { name: 'Cebola em pó', cat: 'MOLHOS e T[...] },
+    { name: 'Molho barbecue', cat: 'MOLHOS e TEMPEROS' }, { name: 'Azeite', cat: 'MOLHOS e TEMPEROS' }, { name: 'Alho em pó', cat: 'MOLHOS e TEMPEROS' }, { name: 'Cebola em pó', cat: 'MOLHOS e TEMPEROS' },
     { name: 'Cerveja', cat: 'BEBIDAS' }, { name: 'Água', cat: 'BEBIDAS' }, { name: 'Água das pedras', cat: 'BEBIDAS' }, { name: 'Refri', cat: 'BEBIDAS' },
     { name: 'Fubá', cat: 'GRÃOS E FARINHA' }, { name: 'Feijão', cat: 'GRÃOS E FARINHA' }, { name: 'Macarrão', cat: 'GRÃOS E FARINHA' }, { name: 'Arroz', cat: 'GRÃOS E FARINHA' },
     { name: 'Wrap', cat: 'PÃES E BISCOITOS' }, { name: 'Pão Rustik', cat: 'PÃES E BISCOITOS' }, { name: 'Biscoito maria', cat: 'PÃES E BISCOITOS' },
     { name: 'Saco areia gato', cat: 'GATO' }, { name: 'Areia gato', cat: 'GATO' }, { name: 'Comida gato', cat: 'GATO' },
     { name: 'Atum', cat: 'ENLATADOS' }, { name: 'Chocolate branco e preto', cat: 'ENLATADOS' }, { name: 'Chili', cat: 'ENLATADOS' }, { name: 'Leite moça', cat: 'ENLATADOS' },
   ];
-  return list.map(item => ({ ...item, has: true }));
+  return list.map(item => ({ ...item, has: true, status: 'tenho' }));
 }
 
 function defaultState() {
@@ -44,7 +60,8 @@ function defaultState() {
     invoices: [],
     instagramInspirations: [], 
     searchQuery: '',
-    tab: 'dashboard'
+    tab: 'dashboard',
+    cartList: []
   };
 }
 
@@ -64,6 +81,7 @@ function initAppState() {
   if (!S.invoices) S.invoices = [];
   if (!S.instagramInspirations) S.instagramInspirations = [];
   if (!S.tab) S.tab = 'dashboard';
+  if (!S.cartList) S.cartList = [];
 
   render();
 }
@@ -76,7 +94,7 @@ function save() {
 function getAllRecipes() {
   const igRecipes = (S.instagramInspirations || []).map(ig => ({
     id: ig.id, 
-    name: `📸 ${ig.name}`,
+    name: '📸 ' + ig.name,
     cat: ig.category || 'Lanches', 
     proteinType: 'lanche',
     bimby: 'Ver link original guardado na aba Insta.', 
@@ -99,7 +117,6 @@ function monthSpend() {
   return S.invoices.filter(i => i && i.date && i.date.startsWith(ym)).reduce((sum, i) => sum + i.total, 0);
 }
 
-/* app.js — PARTE 4 */
 window.switchTab = function(tab) { 
   S.tab = tab; 
   render(); 
@@ -117,7 +134,7 @@ function render() {
   if (S.tab === 'gastos') view = renderGastos();
 
   root.innerHTML = `
-    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family[...]
+    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
       <div onclick="switchTab('dashboard')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
       <div onclick="switchTab('recipes')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
       <div onclick="switchTab('pantry')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Despensa</div>
@@ -240,7 +257,7 @@ window.toggleSelectInstagramRecipe = function(id) {
   render(); 
 };
 
-/* app.js — PARTE 5 */
+/* DASHBOARD */
 function renderDashboard() {
   const totalGasto = monthSpend();
   
@@ -280,7 +297,7 @@ function renderDashboard() {
     <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <small style="color:#6c757d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS</small>
-        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️</but[...]
+        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️</button>
       </div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
         <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
@@ -297,13 +314,13 @@ function renderDashboard() {
     <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
       <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS DESTE MÊS</small>
       <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">R[...]
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura</button>
     </div>
 
     <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu da Semana</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gera[...]
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar</button>
       </div>
       
       ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido.</p>` : `
@@ -324,6 +341,7 @@ function renderDashboard() {
   `;
 }
 
+/* RECEITAS */
 function renderRecipes() {
   const all = getAllRecipes();
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
@@ -339,7 +357,7 @@ function renderRecipes() {
   return `
     <h3 style="margin:0 0 12px 0; color:#333;">❤️ Receitas (${filtered.length})</h3>
     <div style="margin-bottom:12px;">
-      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar..." value="${S.searchQuery || ''}" oninput="S.searchQuery = this.value; save(); render();" style="width:100%; padding:8[...]
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar..." value="${S.searchQuery || ''}" oninput="S.searchQuery = this.value; save(); render();" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
     </div>
     ${filtered.map(r => `
       <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd;">
@@ -347,26 +365,28 @@ function renderRecipes() {
         <div style="margin-top:8px; font-size:12px; color:#555;">
           <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px;">${r.cat}</span>
         </div>
+        ${r.ings ? `<div style="margin-top:6px; font-size:11px; color:#666;"><b>Ingredientes:</b> ${r.ings}</div>` : ''}
       </div>
     `).join('')}
   `;
 }
 
+/* DESPENSA */
 function renderPantry() {
   const groups = {};
+  
   S.pantryStock.forEach((item, index) => {
     if (!groups[item.cat]) groups[item.cat] = [];
     groups[item.cat].push({ ...item, realIndex: index });
   });
 
   return `
-    <h3 style="margin-top:0; color:#333;">🗄️ Organização da Despensa</h3>
+    <h3 style="margin-top:0; color:#333;">🗄️ Despensa</h3>
     <p style="color:#6c757d; font-size:12px; margin-bottom:15px;">Clica nos botões para mudar o estado do item:</p>
     ${Object.keys(groups).map(cat => `
       <div style="margin-bottom:20px;">
         <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">${cat}</b>
         ${groups[cat].map(item => {
-          // Define a cor e o texto dinâmico com base nos 3 estados
           let currentStatus = item.status || 'tenho';
           let textStyle = 'color: #333; text-decoration: none; font-weight:600;';
 
@@ -377,12 +397,12 @@ function renderPantry() {
           }
 
           return `
-            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <span style="${textStyle} font-size:13px;">${item.name}</span>
               <div style="display:flex; gap:4px;">
-                <button onclick="setPantryStatus(${item.realIndex}, 'tenho')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'tenho' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">✅ Tenho</button>
-                <button onclick="setPantryStatus(${item.realIndex}, 'falta')" style="background:#dc3545; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'falta' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">❌ Falta</button>
-                <button onclick="setPantryStatus(${item.realIndex}, 'nao_usar')" style="background:#6c757d; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'nao_usar' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">⚪ Não Usar</button>
+                <button onclick="setPantryStatus(${item.realIndex}, 'tenho')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅ Tenho</button>
+                <button onclick="setPantryStatus(${item.realIndex}, 'falta')" style="background:#dc3545; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">❌ Falta</button>
+                <button onclick="setPantryStatus(${item.realIndex}, 'nao_usar')" style="background:#6c757d; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">🚫 Não Usar</button>
               </div>
             </div>
           `;
@@ -391,59 +411,9 @@ function renderPantry() {
     `).join('')}
   `;
 }
-/* app.js — PARTE 6 */
-window.buyPantryItem = function(index, name, cat) {
-  const priceInput = document.getElementById(`price-pantry-${index}`);
-  const marketInput = document.getElementById(`market-pantry-${index}`);
-  const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
-  const market = marketInput ? marketInput.value : 'Geral';
 
-  S.pantryStock[index].has = true;
-
-  if (price > 0) {
-    S.invoices.push({
-      id: 'inv_' + Date.now(),
-      date: new Date().toISOString().slice(0, 10),
-      market: market,
-      total: price,
-      details: `${name} (${cat})`
-    });
-  }
-  save(); render();
-};
-
-window.buyExtraItem = function(id, name, cat) {
-  const priceInput = document.getElementById(`price-extra-${id}`);
-  const marketInput = document.getElementById(`market-extra-${id}`);
-  const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
-  const market = marketInput ? marketInput.value : 'Geral';
-
-  S.shoppingList = S.shoppingList.filter(item => item.id !== id);
-
-  if (price > 0) {
-    S.invoices.push({
-      id: 'inv_' + Date.now(),
-      date: new Date().toISOString().slice(0, 10),
-      market: market,
-      total: price,
-      details: `${name} (${cat})`
-    });
-  }
-  save(); render();
-};
-
-const selectSupermercados = (idPrefix, indexOrId) => `
-  <select id="market-${idPrefix}-${indexOrId}" style="padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-    <option value="Lidl">Lidl</option>
-    <option value="Mercadona">Mercadona</option>
-    <option value="Continente">Continente</option>
-    <option value="Pingo Doce">Pingo Doce</option>
-    <option value="Outro">Outro</option>
-  </select>
-`;
-
+/* COMPRAS */
 function renderShopping() {
-  // FILTRO CORRIGIDO: Só vai para a lista de compras o que estiver marcado estritamente como 'falta' (Vermelho)
   if (!S.cartList) S.cartList = [];
   const missingFromPantry = S.pantryStock.filter(x => x && x.status === 'falta');
 
@@ -461,7 +431,7 @@ function renderShopping() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Art[...]
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
     </div>
     
     <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Preciso de Comprar (Marcados como Falta):</b>
@@ -470,11 +440,10 @@ function renderShopping() {
       
       ${S.pantryStock.map((item, index) => {
         const alreadyInCart = S.cartList.some(c => c.type === 'pantry' && c.realIdx === index);
-        // SÓ MOSTRA SE ESTIVER COMO 'FALTA' E NÃO ESTIVER NO CARRINHO
         if (item.status !== 'falta' || alreadyInCart) return ''; 
         
         return `
-          <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; fon[...]
+          <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; font-size:13px; color:#c82333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
             <span>🔸 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
             <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
           </div>
@@ -485,15 +454,17 @@ function renderShopping() {
     <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista Extra:</b>
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
       ${S.shoppingList.map(item => `
-        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; cursor:pointer; font-siz[...]
+        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; cursor:pointer; font-size:13px; color:#333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
           <span>🔹 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
           <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
         </div>
       `).join('')}
+      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
     </div>
   `;
 }
 
+/* GASTOS */
 function renderGastos() {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthlyInvoices = (S.invoices || []).filter(i => i && i.date && i.date.startsWith(currentMonth));
@@ -509,30 +480,26 @@ function renderGastos() {
     }
   });
 
-  // Fecha a compra do item faturando o preço real pago
   window.finalizePriceAndCheckout = function(cartIdOrIdx, type, name, cat, realIndexInPantry) {
-    const priceInput = document.getElementById(`price-cart-${cartIdOrIdx}`);
-    const marketSelect = document.getElementById(`market-cart-${cartIdOrIdx}`);
+    const priceInput = document.getElementById('price-cart-' + cartIdOrIdx);
+    const marketSelect = document.getElementById('market-cart-' + cartIdOrIdx);
     const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
     const market = marketSelect ? marketSelect.value : 'Lidl';
 
-    // 1. Devolve o produto à Despensa marcado como "Tenho"
     if (type === 'pantry') {
       S.pantryStock[realIndexInPantry].has = true;
     }
 
-    // 2. Se deitares um preço maior que zero, acumula no histórico de gastos detalhado
     if (price > 0) {
       S.invoices.push({
         id: 'inv_' + Date.now(),
         date: new Date().toISOString().slice(0, 10),
         market: market,
         total: price,
-        details: `${name} (${cat})`
+        details: name + ' (' + cat + ')'
       });
     }
 
-    // 3. Remove permanentemente o item do carrinho de espera
     if (type === 'pantry') {
       S.cartList = S.cartList.filter(c => !(c.type === 'pantry' && c.realIdx === realIndexInPantry));
     } else {
@@ -552,16 +519,14 @@ function renderGastos() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#333;">📊 Fecho de Caixa das Compras</h3>
-      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Li[...]
+      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar</button>
     </div>
 
-    <!-- CARD DO TOTAL DO MÊS -->
     <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
       <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase;">💰 INVESTIMENTO EM REFEIÇÕES DESTE MÊS</small>
       <h2 style="margin:5px 0 0 0; color:#28a745; font-size:26px;">€${totalMes.toFixed(2)}</h2>
     </div>
 
-    <!-- DIVISÃO POR SUPERMERCADOS -->
     <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; margin-bottom:15px; font-size:13px;">
       <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">🛒 Gasto Acumulado por Estabelecimento:</b>
       ${Object.keys(mercadoTotais).length === 0 ? '<p style="color:#aaa; margin:0; font-size:12px; text-align:center;">Nenhum gasto registado ainda.</p>' : ''}
@@ -573,12 +538,11 @@ function renderGastos() {
       `).join('')}
     </div>
 
-    <!-- LISTA DE ARTIGOS COMPRADOS À ESPERA DE VALOR -->
     <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📝 Dar Baixa e Colocar Preço nos Artigos Comprados:</b>
     <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
       ${S.cartList.length === 0 ? `
         <p style="color:#888; font-size:13px; text-align:center; background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin:0;">
-          🛒 O carrinho de faturas está vazio.<br><small style="color:#aaa;">Vai à aba Compras e clica nos itens que meteste no carrinho físico para eles aparecerem aqui.</small>
+          🛒 O carrinho de faturas está vazio.
         </p>
       ` : ''}
       
@@ -598,15 +562,14 @@ function renderGastos() {
                 <option value="Pingo Doce">Pingo Doce</option>
                 <option value="Outro">Outro</option>
               </select>
-              <input type="number" id="price-cart-${idKey}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:[...]
-              <button onclick="finalizePriceAndCheckout('${idKey}', '${item.type}', '${item.name}', '${item.cat}', ${item.realIdx || 0})" style="background:#28a745; color:#fff; border:none; paddi[...]
+              <input type="number" id="price-cart-${idKey}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+              <button onclick="finalizePriceAndCheckout('${idKey}', '${item.type}', '${item.name}', '${item.cat}', ${item.realIdx || 0})" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
             </div>
           </div>
         `;
       }).join('')}
     </div>
 
-    <!-- REGISTO CRONOLÓGICO HISTÓRICO -->
     <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📜 Histórico Recente de Artigos Pagos:</b>
     <div style="display:flex; flex-direction:column; gap:6px;">
       ${[...monthlyInvoices].reverse().slice(0, 10).map(item => `
@@ -622,7 +585,7 @@ function renderGastos() {
   `;
 }
 
-
+/* INSTAGRAM */
 function renderInstagram() {
   const list = [...(S.instagramInspirations || [])].reverse();
 
@@ -657,7 +620,7 @@ function renderInstagram() {
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;">
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Link</label>
-        <input type="url" id="insp-url-input" placeholder="https://instagram.com…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13p[...]
+        <input type="url" id="insp-url-input" placeholder="https://instagram.com…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
       </div>
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome</label>
@@ -665,9 +628,9 @@ function renderInstagram() {
       </div>
       <div style="margin-bottom:12px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Categoria</label>
-        <input type="text" id="insp-cat-input" value="Lanche" placeholder="Lanche ou Almoço/Marmita" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-b[...]
+        <input type="text" id="insp-cat-input" value="Lanche" placeholder="Lanche ou Almoço/Marmita" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
       </div>
-      <button onclick="saveInstagramInspiracionClassic()" style="background:#556b2f; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-s[...]
+      <button onclick="saveInstagramInspiracionClassic()" style="background:#556b2f; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">📌 Guardar</button>
     </div>
 
     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -684,7 +647,7 @@ function renderInstagram() {
               <a href="${item.link}" target="_blank" style="color:#008080; font-size:12px; word-break:break-all; text-decoration:none;">${item.link}</a>
             </div>
             <div style="display:flex; gap:8px; margin-top:10px;">
-              <button onclick="toggleSelectInstagramRecipe('${item.id}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font[...]
+              <button onclick="toggleSelectInstagramRecipe('${item.id}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
                 ${isSelected ? '✕ Remover' : '🍽️ Escolher'}
               </button>
               <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; margin-left:auto;">✕</button>
