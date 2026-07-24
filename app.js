@@ -293,19 +293,21 @@ function renderRecipes() {
     }, 50);
   };
 
-  return `
+    return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
       <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
       <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Receita</button>
     </div>
 
+    <!-- BARRA DE PESQUISA COM ÍCONE -->
     <div style="margin-bottom:12px;">
       <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
     </div>
 
+    <!-- 🏷️ BOTÕES DE SEPARAÇÃO POR ABAS COLORIDAS -->
     <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
       <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
-      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">Doces 🍗 Frango</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍗 Frango</button>
       <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
       <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
       <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
@@ -334,6 +336,7 @@ function renderRecipes() {
         
         ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
 
+        <!-- 🛒 CAIXA CINZENTA DE INGREDIENTES E PASSO A PASSO SEMPRE VISÍVEL -->
         <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
           <div style="margin-bottom:6px;">
             <b>🛒 Ingredientes necessários:</b>
@@ -345,7 +348,6 @@ function renderRecipes() {
     `).join('')}
   `;
 }
-
 
 /* DESPENSA */
 function renderPantry() {
