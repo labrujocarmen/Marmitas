@@ -780,3 +780,59 @@ function renderInstagram() {
     </div>
   `;
 }
+
+window.addNewRecipe = function() {
+  const name = prompt("Nome da nova receita:");
+  if (!name) return;
+  
+  // Pergunta a categoria para o sistema saber onde a arrumar automaticamente
+  const cat = prompt("Categoria (digita: Almoço/Marmita ou Lanches):", "Almoço/Marmita") || "Almoço/Marmita";
+  const ings = prompt("Escreve os ingredientes necessários (separados por vírgula):") || "Ingredientes a gosto.";
+  const steps = prompt("Escreve o modo de fazer passo a passo:") || "Preparar a gosto.";
+
+  // Identifica o tipo de proteína pelo nome para o gerador misto aleatório funcionar bem
+  let proteinType = 'frango';
+  const lowName = name.toLowerCase();
+  if (lowName.includes('carne') || lowName.includes('vaca') || lowName.includes('porco') || lowName.includes('almôndegas')) proteinType = 'carne';
+  if (lowName.includes('peixe') || lowName.includes('bacalhau') || lowName.includes('salmão') || lowName.includes('atum')) proteinType = 'peixe';
+  if (cat.toLowerCase().includes('lanche')) proteinType = 'lanche';
+
+  S.myRecipes.push({ 
+    id: 'my_' + Date.now(), 
+    name: name, 
+    cat: cat, 
+    proteinType: proteinType,
+    ings: ings, 
+    steps: steps,
+    isSuggestion: false 
+  });
+  
+  save(); 
+  render();
+  alert("✨ Nova receita guardada com sucesso no teu Livro!");
+};
+
+window.toggleSelectRecipe = function(id) {
+  if (!S.selectedLunches) S.selectedLunches = [];
+  if (!S.selectedSnacks) S.selectedSnacks = [];
+
+  const all = getAllRecipes();
+  const found = all.find(x => x.id === id);
+  const isLanche = found && found.cat && found.cat.toLowerCase().includes('lanche');
+
+  if (isLanche) {
+    // Se for um Lanche, gere e guarda na gaveta de lanches da semana
+    const idx = S.selectedSnacks.indexOf(id);
+    if (idx > -1) S.selectedSnacks.splice(idx, 1);
+    else S.selectedSnacks.push(id);
+  } else {
+    // Se for Almoço/Marmita, guarda na gaveta de almoços da semana
+    const idx = S.selectedLunches.indexOf(id);
+    if (idx > -1) S.selectedLunches.splice(idx, 1);
+    else S.selectedLunches.push(id);
+  }
+
+  save(); 
+  render();
+};
+
