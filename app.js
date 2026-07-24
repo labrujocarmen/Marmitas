@@ -814,4 +814,4 @@ window.addNewRecipe = function() {
   save(); 
   render();
   alert("✨ Nova receita guardada com sucesso e ativa nas abas!");
-};
+}; 
