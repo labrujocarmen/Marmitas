@@ -211,10 +211,28 @@ window.addCustomShoppingItem = function() {
   save(); render();
 };
 
-window.toggleShoppingItem = function(id) {
-  const item = S.shoppingList.find(i => i.id === id);
-  if (item) { item.done = !item.done; save(); setTimeout(render, 200); }
+window.togglePantry = function(index) {
+  const item = S.pantryStock[index];
+  
+  // Se o teu stock antigo ainda usar true/false na memória do PC, limpa para o novo modelo
+  if (item.has === true) item.status = 'tenho';
+  if (item.has === false && item.status === undefined) item.status = 'falta';
+
+  // Ciclo dos 3 Estados: Tenho ➔ Falta ➔ Não Usar ➔ Tenho
+  if (!item.status || item.status === 'tenho') {
+    item.status = 'falta';
+    item.has = false; // Mantém compatibilidade com o resto da app
+  } else if (item.status === 'falta') {
+    item.status = 'nao_usar';
+    item.has = true;  // Não usar significa que NÃO vai para a lista de compras
+  } else {
+    item.status = 'tenho';
+    item.has = true;
+  }
+
+  save(); render();
 };
+
 
 window.togglePantry = function(index) {
   S.pantryStock[index].has = !S.pantryStock[index].has;
@@ -347,30 +365,46 @@ function renderRecipes() {
 
 function renderPantry() {
   const groups = {};
-  
   S.pantryStock.forEach((item, index) => {
     if (!groups[item.cat]) groups[item.cat] = [];
     groups[item.cat].push({ ...item, realIndex: index });
   });
 
   return `
-    <h3 style="margin-top:0; color:#333;">🗄️ Despensa</h3>
+    <h3 style="margin-top:0; color:#333;">🗄️ Organização da Despensa</h3>
+    <p style="color:#6c757d; font-size:12px; margin-bottom:15px;">Clica no botão para mudar: Verde (Tenho) ➔ Vermelho (Falta) ➔ Cinza (Não usar).</p>
     ${Object.keys(groups).map(cat => `
       <div style="margin-bottom:20px;">
-        <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px;">${cat}</b>
-        ${groups[cat].map(item => `
-          <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
-            <span style="color: ${item.has ? '#333' : '#aaa'}; font-weight:600; font-size:13px;">${item.name}</span>
-            <button onclick="togglePantry(${item.realIndex})" style="background:${item.has ? '#28a745':'#dc3545'}; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-              ${item.has ? '✅' : '❌'}
-            </button>
-          </div>
-        `).join('')}
+        <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">${cat}</b>
+        ${groups[cat].map(item => {
+          // Define a cor e o texto dinâmico com base nos 3 estados
+          let btnColor = '#28a745';
+          let btnText = '✅ Tenho';
+          let textStyle = 'color: #333; text-decoration: none; font-weight:600;';
+
+          if (item.status === 'falta') {
+            btnColor = '#dc3545';
+            btnText = '❌ Falta';
+            textStyle = 'color: #c82333; text-decoration: none; font-weight:600;';
+          } else if (item.status === 'nao_usar') {
+            btnColor = '#6c757d';
+            btnText = '⚪ Não Usar';
+            textStyle = 'color: #aaa; text-decoration: line-through; font-weight:normal;';
+          }
+
+          return `
+            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
+              <span style="${textStyle} font-size:13px;">${item.name}</span>
+              <button onclick="togglePantry(${item.realIndex})" style="background:${btnColor}; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; min-width: 90px;">
+                ${btnText}
+              </button>
+            </div>
+          `;
+        }).join('')}
       </div>
     `).join('')}
   `;
 }
-
 /* app.js — PARTE 6 */
 window.buyPantryItem = function(index, name, cat) {
   const priceInput = document.getElementById(`price-pantry-${index}`);
@@ -423,11 +457,10 @@ const selectSupermercados = (idPrefix, indexOrId) => `
 `;
 
 function renderShopping() {
-  // Filtra apenas o que está em falta na despensa e que ainda não foi enviado para os Gastos
+  // FILTRO CORRIGIDO: Só vai para a lista de compras o que estiver marcado estritamente como 'falta' (Vermelho)
   if (!S.cartList) S.cartList = [];
-  const missingFromPantry = S.pantryStock.filter(x => x && x.has === false);
+  const missingFromPantry = S.pantryStock.filter(x => x && x.status === 'falta');
 
-  // Ação ao clicar: mete o item no carrinho, tira-o das Compras e manda-o para os Gastos
   window.putItemInCartFromPantry = function(index, name, cat) {
     S.cartList.push({ type: 'pantry', realIdx: index, name: name, cat: cat });
     save(); render();
@@ -445,19 +478,19 @@ function renderShopping() {
       <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
     </div>
     
-    <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Preciso de Comprar (Falta na Despensa):</b>
+    <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Preciso de Comprar (Marcados como Falta):</b>
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;">
       ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Nada em falta na Despensa!</p>' : ''}
       
       ${S.pantryStock.map((item, index) => {
-        // Se o item já foi clicado e enviado para a aba Gastos, esconde-o daqui
         const alreadyInCart = S.cartList.some(c => c.type === 'pantry' && c.realIdx === index);
-        if (item.has === true || alreadyInCart) return ''; 
+        // SÓ MOSTRA SE ESTIVER COMO 'FALTA' E NÃO ESTIVER NO CARRINHO
+        if (item.status !== 'falta' || alreadyInCart) return ''; 
         
         return `
           <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; font-size:13px; color:#c82333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
             <span>🔸 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
-            <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Meter no Carrinho</span>
+            <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
           </div>
         `;
       }).join('')}
@@ -466,12 +499,11 @@ function renderShopping() {
     <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista Extra:</b>
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
       ${S.shoppingList.map(item => `
-        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:66px; cursor:pointer; font-size:13px; color:#333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
+        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; cursor:pointer; font-size:13px; color:#333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
           <span>🔹 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
-          <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Meter no Carrinho</span>
+          <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
         </div>
       `).join('')}
-      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
     </div>
   `;
 }
