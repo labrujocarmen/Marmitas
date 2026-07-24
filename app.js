@@ -549,7 +549,6 @@ function renderInstagram() {
     </div>
   `;
 }
-
 function render() {
   const root = document.getElementById('app-root') || document.body;
   if (!root) return;
