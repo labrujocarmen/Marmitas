@@ -423,49 +423,52 @@ const selectSupermercados = (idPrefix, indexOrId) => `
 `;
 
 function renderShopping() {
-  const missingFromPantry = S.pantryStock.filter(x => !x.has);
+  // Filtra apenas o que está em falta na despensa e que ainda não foi enviado para os Gastos
+  if (!S.cartList) S.cartList = [];
+  const missingFromPantry = S.pantryStock.filter(x => x && x.has === false);
+
+  // Ação ao clicar: mete o item no carrinho, tira-o das Compras e manda-o para os Gastos
+  window.putItemInCartFromPantry = function(index, name, cat) {
+    S.cartList.push({ type: 'pantry', realIdx: index, name: name, cat: cat });
+    save(); render();
+  };
+
+  window.putItemInCartFromExtra = function(id, name, cat) {
+    S.cartList.push({ type: 'extra', id: id, name: name, cat: cat });
+    S.shoppingList = S.shoppingList.filter(item => item.id !== id);
+    save(); render();
+  };
 
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">🛒 Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕</button>
+      <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
     </div>
     
-    <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">Falta na Despensa:</b>
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;">
-      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Despensa completa!</p>' : ''}
+    <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Preciso de Comprar (Falta na Despensa):</b>
+    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;">
+      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Nada em falta na Despensa!</p>' : ''}
       
       ${S.pantryStock.map((item, index) => {
-        if (item.has) return '';
+        // Se o item já foi clicado e enviado para a aba Gastos, esconde-o daqui
+        const alreadyInCart = S.cartList.some(c => c.type === 'pantry' && c.realIdx === index);
+        if (item.has === true || alreadyInCart) return ''; 
+        
         return `
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; background:#fdf2f2; padding:8px; border-radius:6px; border:1px solid #f5c6cb;">
-            <div>
-              <span style="font-weight:600; font-size:13px; color:#c82333;">${item.name}</span>
-              <small style="display:block; color:#6c757d; font-size:10px;">${item.cat}</small>
-            </div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              ${selectSupermercados('pantry', index)}
-              <input type="number" id="price-pantry-${index}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-              <button onclick="buyPantryItem(${index}, '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✓</button>
-            </div>
+          <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; font-size:13px; color:#c82333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
+            <span>🔸 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
+            <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Meter no Carrinho</span>
           </div>
         `;
       }).join('')}
     </div>
 
-    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">Outras Compras:</b>
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
+    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista Extra:</b>
+    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
       ${S.shoppingList.map(item => `
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #e2e3e5;">
-          <div>
-            <span style="font-weight:600; font-size:13px; color:#333;">${item.name}</span>
-            <small style="display:block; color:#6c757d; font-size:10px;">${item.cat}</small>
-          </div>
-          <div style="display:flex; align-items:center; gap:4px;">
-            ${selectSupermercados('extra', item.id)}
-            <input type="number" id="price-extra-${item.id}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-            <button onclick="buyExtraItem('${item.id}', '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✓</button>
-          </div>
+        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:66px; cursor:pointer; font-size:13px; color:#333; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
+          <span>🔹 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
+          <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Meter no Carrinho</span>
         </div>
       `).join('')}
       ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
@@ -477,6 +480,7 @@ function renderGastos() {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthlyInvoices = (S.invoices || []).filter(i => i && i.date && i.date.startsWith(currentMonth));
   const totalMes = monthlyInvoices.reduce((sum, i) => sum + (Number(i.total) || 0), 0);
+  if (!S.cartList) S.cartList = [];
 
   const mercadoTotais = {};
   monthlyInvoices.forEach(i => {
@@ -487,17 +491,19 @@ function renderGastos() {
     }
   });
 
-  // Função para dar baixa no item, atualizar a Despensa e somar o preço nos Gastos
-  window.payAndUpdatePantryItem = function(index, name, cat) {
-    const priceInput = document.getElementById(`price-gastos-${index}`);
-    const marketSelect = document.getElementById(`market-gastos-${index}`);
+  // Fecha a compra do item faturando o preço real pago
+  window.finalizePriceAndCheckout = function(cartIdOrIdx, type, name, cat, realIndexInPantry) {
+    const priceInput = document.getElementById(`price-cart-${cartIdOrIdx}`);
+    const marketSelect = document.getElementById(`market-cart-${cartIdOrIdx}`);
     const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
     const market = marketSelect ? marketSelect.value : 'Lidl';
 
-    // 1. Atualiza a Despensa de volta para "Tenho" (has: true)
-    S.pantryStock[index].has = true;
+    // 1. Devolve o produto à Despensa marcado como "Tenho"
+    if (type === 'pantry') {
+      S.pantryStock[realIndexInPantry].has = true;
+    }
 
-    // 2. Regista o preço no histórico detalhado
+    // 2. Se deitares um preço maior que zero, acumula no histórico de gastos detalhado
     if (price > 0) {
       S.invoices.push({
         id: 'inv_' + Date.now(),
@@ -508,8 +514,14 @@ function renderGastos() {
       });
     }
 
+    // 3. Remove permanentemente o item do carrinho de espera
+    if (type === 'pantry') {
+      S.cartList = S.cartList.filter(c => !(c.type === 'pantry' && c.realIdx === realIndexInPantry));
+    } else {
+      S.cartList = S.cartList.filter(c => !(c.type === 'extra' && c.id === cartIdOrIdx));
+    }
+
     save(); render();
-    alert(`💰 ${name} atualizado e somado aos gastos!`);
   };
 
   window.clearHistoryGastos = function() {
@@ -519,19 +531,10 @@ function renderGastos() {
     }
   };
 
-  // Agrupa apenas os produtos em falta (has === false) para desenhar a lista por categorias com os preços
-  const groups = {};
-  S.pantryStock.forEach((item, index) => {
-    if (item && item.has === false) { 
-      if (!groups[item.cat]) groups[item.cat] = [];
-      groups[item.cat].push({ ...item, realIdx: index });
-    }
-  });
-
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">💰 Registo de Valores por Despensa</h3>
-      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar</button>
+      <h3 style="margin:0; color:#333;">📊 Fecho de Caixa das Compras</h3>
+      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar Histórico</button>
     </div>
 
     <!-- CARD DO TOTAL DO MÊS -->
@@ -542,7 +545,7 @@ function renderGastos() {
 
     <!-- DIVISÃO POR SUPERMERCADOS -->
     <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; margin-bottom:15px; font-size:13px;">
-      <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">🛒 Divisão por Estabelecimento:</b>
+      <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">🛒 Gasto Acumulado por Estabelecimento:</b>
       ${Object.keys(mercadoTotais).length === 0 ? '<p style="color:#aaa; margin:0; font-size:12px; text-align:center;">Nenhum gasto registado ainda.</p>' : ''}
       ${Object.keys(mercadoTotais).map(m => `
         <div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed #f0f0f0;">
@@ -552,40 +555,43 @@ function renderGastos() {
       `).join('')}
     </div>
 
-    <!-- A TUA LISTA DA DESPENSA EM FALTA COM OS VALORES PASSADA PARA AQUI -->
-    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📝 Colocar Preço nos Artigos Comprados:</b>
-    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-      ${Object.keys(groups).length === 0 ? '<p style="color:#28a745; font-size:13px; font-weight:bold; text-align:center; background:#fff; padding:15px; border-radius:8px; border:1px solid #eee;">✅ Tudo controlado! Nenhum produto em falta na despensa.</p>' : ''}
+    <!-- LISTA DE ARTIGOS COMPRADOS À ESPERA DE VALOR -->
+    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📝 Dar Baixa e Colocar Preço nos Artigos Comprados:</b>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+      ${S.cartList.length === 0 ? `
+        <p style="color:#888; font-size:13px; text-align:center; background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; margin:0;">
+          🛒 O carrinho de faturas está vazio.<br><small style="color:#aaa;">Vai à aba Compras e clica nos itens que meteste no carrinho físico para eles aparecerem aqui.</small>
+        </p>
+      ` : ''}
       
-      ${Object.keys(groups).map(cat => `
-        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee;">
-          <b style="color:#007bff; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">${cat}</b>
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            ${groups[cat].map(item => `
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding:4px 0;">
-                <span style="font-size:13px; font-weight:600; color:#333; flex:1;">${item.name}</span>
-                <div style="display:flex; align-items:center; gap:4px;">
-                  <select id="market-gastos-${item.realIdx}" style="padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
-                    <option value="Lidl">Lidl</option>
-                    <option value="Mercadona">Mercadona</option>
-                    <option value="Continente">Continente</option>
-                    <option value="Pingo Doce">Pingo Doce</option>
-                    <option value="Outro">Outro</option>
-                  </select>
-                  <input type="number" id="price-gastos-${item.realIdx}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
-                  <button onclick="payAndUpdatePantryItem(${item.realIdx}, '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
-                </div>
-              </div>
-            `).join('')}
+      ${S.cartList.map(item => {
+        const idKey = item.type === 'pantry' ? item.realIdx : item.id;
+        return `
+          <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+            <div style="flex:1;">
+              <span style="font-size:13px; font-weight:600; color:#222;">${item.name}</span>
+              <small style="display:block; color:#6c757d; font-size:10px; text-transform:uppercase;">${item.cat}</small>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              <select id="market-cart-${idKey}" style="padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
+                <option value="Lidl">Lidl</option>
+                <option value="Mercadona">Mercadona</option>
+                <option value="Continente">Continente</option>
+                <option value="Pingo Doce">Pingo Doce</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <input type="number" id="price-cart-${idKey}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+              <button onclick="finalizePriceAndCheckout('${idKey}', '${item.type}', '${item.name}', '${item.cat}', ${item.realIdx || 0})" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
+            </div>
           </div>
-        </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
 
-    <!-- HISTÓRICO CRONOLÓGICO -->
+    <!-- REGISTO CRONOLÓGICO HISTÓRICO -->
     <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📜 Histórico Recente de Artigos Pagos:</b>
     <div style="display:flex; flex-direction:column; gap:6px;">
-      ${[...monthlyInvoices].reverse().slice(0, 15).map(item => `
+      ${[...monthlyInvoices].reverse().slice(0, 10).map(item => `
         <div style="background:#fff; padding:8px 12px; border-radius:6px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
           <div>
             <b style="color:#222;">${item.details || 'Fatura Geral'}</b>
@@ -597,6 +603,7 @@ function renderGastos() {
     </div>
   `;
 }
+
 
 function renderInstagram() {
   const list = [...(S.instagramInspirations || [])].reverse();
