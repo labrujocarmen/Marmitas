@@ -604,12 +604,17 @@ function renderShopping() {
 function renderGastos() {
   const currentMonth = new Date().toISOString().slice(0, 7);
   const monthlyInvoices = (S.invoices || []).filter(i => i && i.date && i.date.startsWith(currentMonth));
-  const totalMes = monthlyInvoices.reduce((sum, i) => sum + i.total, 0);
+  const totalMes = monthlyInvoices.reduce((sum, i) => sum + (Number(i.total) || 0), 0);
 
-  // Agrupa os totais gastos por cada supermercado neste mês
+  // Agrupa os totais gastos por cada supermercado neste mês com salvaguarda de erro
   const mercadoTotais = {};
   monthlyInvoices.forEach(i => {
-    mercadoTotais[i.market] = (mercadoTotais[i.market] || 0) + i.total;
+    if (i) {
+      // Se a fatura antiga não tiver mercado, define como 'Manual/Outro' para não quebrar a app
+      const nomeMercado = i.market || 'Manual/Outro';
+      const valorTotal = Number(i.total) || 0;
+      mercadoTotais[nomeMercado] = (mercadoTotais[nomeMercado] || 0) + valorTotal;
+    }
   });
 
   window.clearHistoryGastos = function() {
@@ -649,16 +654,17 @@ function renderGastos() {
       ${[...monthlyInvoices].reverse().map(item => `
         <div style="background:#fff; padding:10px; border-radius:6px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
           <div>
-            <b style="color:#222;">${item.details || 'Compra Manual'}</b>
-            <small style="display:block; color:#888; font-size:10px;">🏪 ${item.market} — 📅 ${item.date}</small>
+            <b style="color:#222;">${item.details || 'Fatura Manual'}</b>
+            <small style="display:block; color:#888; font-size:10px;">🏪 ${item.market || 'Manual/Outro'} — 📅 ${item.date}</small>
           </div>
-          <span style="font-weight:700; color:#28a745; font-size:14px; white-space:nowrap;">+ €${item.total.toFixed(2)}</span>
+          <span style="font-weight:700; color:#28a745; font-size:14px; white-space:nowrap;">+ €${(Number(item.total) || 0).toFixed(2)}</span>
         </div>
       `).join('')}
       ${monthlyInvoices.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:10px;">Nenhum artigo registado neste mês de forma detalhada.</p>' : ''}
     </div>
   `;
 }
+
 
   // Função para concluir a compra de um Artigo Extra da lista de supermercado
   window.buyExtraItem = function(id, name, cat) {
