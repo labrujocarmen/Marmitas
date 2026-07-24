@@ -80,20 +80,23 @@ function getInitialPantry() {
 
 function defaultState() {
   return {
-    settings: { people: 3, marmitaDays: 5 },
+    settings: { kcalTu: 1200, kcalEle: 1800, protTu: 135, protEle: 200, carboTu: 80, carboEle: 100 },
     currentWeek: 1,
     myRecipes: [], 
     selectedLunches: [], 
+    selectedSnacks: [],
+    selectedInstagramExtras: [],
     pantryStock: getInitialPantry(),
     shoppingList: [],
-    invoices: [], 
+    invoices: [], // Onde guardaremos o histórico detalhado: {id, date, market, total, items}
     instagramInspirations: [], 
+    searchQuery: '',
     tab: 'dashboard'
   };
 }
 
 function initAppState() {
-  const saved = localStorage.getItem('Marmitas_Pro_Final_v50');
+  const saved = localStorage.getItem('Marmitas_Pro_Final_v25');
   if (saved) {
     try { S = JSON.parse(saved); } catch(e) { S = defaultState(); }
   } else {
@@ -114,7 +117,7 @@ function initAppState() {
 
 function save() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_Final_v50', JSON.stringify(S)), 300);
+  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_Final_v25', JSON.stringify(S)), 300);
 }
 
 function getAllRecipes() {
@@ -542,33 +545,168 @@ function renderPantry() {
 function renderShopping() {
   const missingFromPantry = S.pantryStock.filter(x => !x.has);
 
+  // Função para concluir a compra de um item da Despensa
+  window.buyPantryItem = function(index, name, cat) {
+    const priceInput = document.getElementById(`price-pantry-${index}`);
+    const marketInput = document.getElementById(`market-pantry-${index}`);
+    const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+    const market = marketInput ? marketInput.value : 'Geral';
+
+    // 1. Abastece a Despensa
+    S.pantryStock[index].has = true;
+
+    // 2. Se houver preço, regista no histórico de gastos detalhado
+    if (price > 0) {
+      S.invoices.push({
+        id: 'inv_' + Date.now(),
+        date: new Date().toISOString().slice(0, 10),
+        market: market,
+        total: price,
+        details: `${name} (${cat})`
+      });
+    }
+    save(); render();
+  };
+function renderGastos() {
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const monthlyInvoices = (S.invoices || []).filter(i => i && i.date && i.date.startsWith(currentMonth));
+  const totalMes = monthlyInvoices.reduce((sum, i) => sum + i.total, 0);
+
+  // Agrupa os totais gastos por cada supermercado neste mês
+  const mercadoTotais = {};
+  monthlyInvoices.forEach(i => {
+    mercadoTotais[i.market] = (mercadoTotais[i.market] || 0) + i.total;
+  });
+
+  window.clearHistoryGastos = function() {
+    if (confirm("Desejas limpar todo o teu histórico de gastos acumulado?")) {
+      S.invoices = [];
+      save(); render();
+    }
+  };
+
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
-    </div>
-    
-    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Falta na Despensa (Aviso Automático):</b>
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:20px;">
-      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Armário abastecido! Nada em falta.</p>' : ''}
-      <ul style="padding-left:15px; margin:0; font-size:13px; color:#c82333;">
-        ${missingFromPantry.map(i => `<li style="padding:3px 0; font-weight:600;">${i.name} <small style="color:#6c757d;">(${i.cat})</small></li>`).join('')}
-      </ul>
+      <h3 style="margin:0; color:#333;">📊 Gestão de Gastos Detalhada</h3>
+      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar Tudo</button>
     </div>
 
-    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista do Supermercado:</b>
-    <div style="background:#fff; padding:5px 12px; border-radius:8px; border:1px solid #eee;">
-      ${S.shoppingList.map(item => `
-        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px;">
-          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="transform: scale(1.2); cursor:pointer;"> 
-          <span style="text-decoration:${item.done ? 'line-through' : 'none'}; color:${item.done ? '#aaa' : '#333'}; font-weight:500; font-size:14px;">${item.name}</span> 
-          <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold; margin-left:auto;">${item.cat}</span>
+    <!-- CARD DO TOTAL DO MÊS -->
+    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
+      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase;">💰 INVESTIMENTO EM REFEIÇÕES DESTE MÊS</small>
+      <h2 style="margin:5px 0 0 0; color:#28a745; font-size:28px;">€${totalMes.toFixed(2)}</h2>
+    </div>
+
+    <!-- DIVISÃO POR SUPERMERCADOS -->
+    <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; margin-bottom:15px; font-size:13px;">
+      <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">🛒 Divisão por Estabelecimento:</b>
+      ${Object.keys(mercadoTotais).length === 0 ? '<p style="color:#aaa; margin:0; font-size:12px;">Nenhum gasto registado com supermercados ainda.</p>' : ''}
+      ${Object.keys(mercadoTotais).map(m => `
+        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #f0f0f0;">
+          <span>🏪 <b>${m}:</b></span>
+          <span style="font-weight:700; color:#333;">€${mercadoTotais[m].toFixed(2)}</span>
         </div>
       `).join('')}
-      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; padding:10px 0; margin:0;">Nenhum artigo extra adicionado.</p>' : ''}
+    </div>
+
+    <!-- LISTA HISTÓRICA RECENTE -->
+    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📜 Registo Cronológico de Compras:</b>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      ${[...monthlyInvoices].reverse().map(item => `
+        <div style="background:#fff; padding:10px; border-radius:6px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+          <div>
+            <b style="color:#222;">${item.details || 'Compra Manual'}</b>
+            <small style="display:block; color:#888; font-size:10px;">🏪 ${item.market} — 📅 ${item.date}</small>
+          </div>
+          <span style="font-weight:700; color:#28a745; font-size:14px; white-space:nowrap;">+ €${item.total.toFixed(2)}</span>
+        </div>
+      `).join('')}
+      ${monthlyInvoices.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:10px;">Nenhum artigo registado neste mês de forma detalhada.</p>' : ''}
     </div>
   `;
 }
+
+  // Função para concluir a compra de um Artigo Extra da lista de supermercado
+  window.buyExtraItem = function(id, name, cat) {
+    const priceInput = document.getElementById(`price-extra-${id}`);
+    const marketInput = document.getElementById(`market-extra-${id}`);
+    const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+    const market = marketInput ? marketInput.value : 'Geral';
+
+    // 1. Marca como feito e remove da lista ativa
+    S.shoppingList = S.shoppingList.filter(item => item.id !== id);
+
+    // 2. Se houver preço, regista no histórico
+    if (price > 0) {
+      S.invoices.push({
+        id: 'inv_' + Date.now(),
+        date: new Date().toISOString().slice(0, 10),
+        market: market,
+        total: price,
+        details: `${name} (${cat})`
+      });
+    }
+    save(); render();
+  };
+
+  const selectSupermercados = (idPrefix, indexOrId) => `
+    <select id="market-${idPrefix}-${indexOrId}" style="padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
+      <option value="Lidl">Lidl</option>
+      <option value="Mercadona">Mercadona</option>
+      <option value="Continente">Continente</option>
+      <option value="Pingo Doce">Pingo Doce</option>
+      <option value="Outro">Outro</option>
+    </select>
+  `;
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+      <h3 style="margin:0; color:#333;">🛒 Lista de Compras Inteligente</h3>
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
+    </div>
+    
+    <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Falta na Despensa (Completa ao Comprar):</b>
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:20px; display:flex; flex-direction:column; gap:8px;">
+      ${missingFromPantry.length === 0 ? '<p style="color:#28a745; font-size:12px; margin:0; font-weight:bold;">✅ Despensa abastecida! Nada em falta.</p>' : ''}
+      
+      ${S.pantryStock.map((item, index) => {
+        if (item.has) return ''; // Só mostra os que estão em falta
+        return `
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; background:#fdf2f2; padding:8px; border-radius:6px; border:1px solid #f5c6cb;">
+            <div style="flex:1;">
+              <span style="font-weight:600; font-size:13px; color:#c82333;">${item.name}</span>
+              <small style="display:block; color:#6c757d; font-size:10px;">${item.cat}</small>
+            </div>
+            <div style="display:flex; align-items:center; gap:4px;">
+              ${selectSupermercados('pantry', index)}
+              <input type="number" id="price-pantry-${index}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+              <button onclick="buyPantryItem(${index}, '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista do Supermercado:</b>
+    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
+      ${S.shoppingList.map(item => `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #e2e3e5;">
+          <div style="flex:1;">
+            <span style="font-weight:600; font-size:13px; color:#333;">${item.name}</span>
+            <small style="display:block; color:#6c757d; font-size:10px;">${item.cat}</small>
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            ${selectSupermercados('extra', item.id)}
+            <input type="number" id="price-extra-${item.id}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+            <button onclick="buyExtraItem('${item.id}', '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
+          </div>
+        </div>
+      `).join('')}
+      ${S.shoppingList.length === 0 ? '<p style="color:#888; font-size:12px; margin:0; padding:5px 0;">Nenhum artigo extra adicionado.</p>' : ''}
+    </div>
+  `;
+}
+
 
 function renderInstagram() {
   // Converte a lista atual para ordem inversa
@@ -663,23 +801,26 @@ function render() {
   if (S.tab === 'recipes') view = renderRecipes();
   if (S.tab === 'pantry') view = renderPantry();
   if (S.tab === 'shopping') view = renderShopping();
-  if (S.tab === 'instagram') view = renderInstagram();
+  if (S.tab === 'instagram') view = renderInstagram(); // O teu Insta clássico continua 100% ativo aqui!
+  if (S.tab === 'gastos') view = renderGastos(); 
 
   root.innerHTML = `
-    <nav style="display:grid; grid-template-columns: repeat(5, 1fr); background:#111; color:#fff; font-size:11px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
-      <div onclick="switchTab('dashboard')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
-      <!-- ATUALIZADO: De Livro para Receitas -->
-      <div onclick="switchTab('recipes')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
-      <!-- ATUALIZADO: De Stock para Despensa -->
-      <div onclick="switchTab('pantry')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Despensa</div>
-      <div onclick="switchTab('shopping')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
-      <div onclick="switchTab('instagram')" style="padding:14px 2px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
+    <!-- Barra de navegação com 6 colunas para manter o Insta e os Gastos juntos -->
+    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
+      <div onclick="switchTab('dashboard')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
+      <div onclick="switchTab('recipes')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
+      <div onclick="switchTab('pantry')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Despensa</div>
+      <div onclick="switchTab('shopping')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
+      <div onclick="switchTab('instagram')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
+      <div onclick="switchTab('gastos')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='gastos'?'#007bff':''};">💰 Gastos</div>
     </nav>
     <div style="padding:15px; max-width:600px; margin:0 auto; font-family:sans-serif; background:#f8f9fa; min-height:100vh; box-sizing:border-box;">
       ${view}
     </div>
   `;
 }
+
+
 
 document.addEventListener('DOMContentLoaded', initAppState);
 if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
