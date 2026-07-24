@@ -123,8 +123,27 @@ function save() {
 }
 
 function getAllRecipes() {
-  return [...(S.myRecipes || []), ...DEFAULT_RECIPES, ...EXTRA_RECIPES];
+  // Transforma os teus links salvos do Instagram em receitas válidas para o plano semanal
+  const igRecipes = (S.instagramInspirations || []).map(ig => ({
+    id: ig.id, 
+    name: `📸 ${ig.name}`, // Adiciona um emoji para saberes no painel que veio do Insta/Internet
+    cat: ig.category || 'Lanches', 
+    proteinType: 'lanche', // Define como lanche por padrão
+    bimby: 'Ver link original guardado na aba Insta.', 
+    airfryer: '', 
+    calories: 0, 
+    protein: 0, 
+    isSuggestion: false, 
+    isFromInstagram: true, 
+    link: ig.link, 
+    ings: 'Ver detalhes no link original.', 
+    steps: 'Seguir os passos do site original.'
+  }));
+
+  // Junta as tuas receitas criadas à mão, os links do Insta, e todas as sugestões do sistema
+  return [...(S.myRecipes || []), ...igRecipes, ...(typeof DEFAULT_RECIPES !== 'undefined' ? DEFAULT_RECIPES : []), ...(typeof EXTRA_RECIPES !== 'undefined' ? EXTRA_RECIPES : [])];
 }
+
 
 function monthSpend() {
   const ym = new Date().toISOString().slice(0,7);
