@@ -60,11 +60,6 @@ const EXTRA_RECIPES = [
   { id: 'l_salmao', name: 'Sandes com cream cheese e salmão fumado + rúcula', cat: 'Lanches', proteinType: 'lanche', bimby: '', airfryer: '', isSuggestion: true, ings: 'Pão ou Wrap, Queijo creme light, Salmão fumado, Rúcula', steps: 'Unte o pão com o queijo creme, deite as fatias de salmão fumado por cima e finaliza com a rúcula.' }
 ];
 
-
-
-
-
-  
 /* app.js — PARTE 3 */
 function getInitialPantry() {
   const list = [
@@ -98,7 +93,7 @@ function defaultState() {
 }
 
 function initAppState() {
-  const saved = localStorage.getItem('Marmitas_Pro_Final_v5');
+  const saved = localStorage.getItem('Marmitas_Pro_Final_v50');
   if (saved) {
     try { S = JSON.parse(saved); } catch(e) { S = defaultState(); }
   } else {
@@ -119,7 +114,7 @@ function initAppState() {
 
 function save() {
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_Final_v5', JSON.stringify(S)), 300);
+  saveTimer = setTimeout(() => localStorage.setItem('Marmitas_Pro_Final_v50', JSON.stringify(S)), 300);
 }
 
 function getAllRecipes() {
