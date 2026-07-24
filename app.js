@@ -144,7 +144,6 @@ function getAllRecipes() {
   return [...(S.myRecipes || []), ...igRecipes, ...(typeof DEFAULT_RECIPES !== 'undefined' ? DEFAULT_RECIPES : []), ...(typeof EXTRA_RECIPES !== 'undefined' ? EXTRA_RECIPES : [])];
 }
 
-
 function monthSpend() {
   const ym = new Date().toISOString().slice(0,7);
   if (!S.invoices) return 0;
@@ -249,12 +248,21 @@ window.togglePantry = function(index) {
   save(); render();
 };
 
-window.toggleSelectRecipe = function(id) {
-  const idx = S.selectedLunches.indexOf(id);
-  if (idx > -1) S.selectedLunches.splice(idx, 1);
-  else S.selectedLunches.push(id);
-  save(); render();
+window.toggleSelectInstagramRecipe = function(id) {
+  // Cria uma gaveta limpa na memória para as ideias extra da internet
+  if (!S.selectedInstagramExtras) S.selectedInstagramExtras = [];
+
+  const idx = S.selectedInstagramExtras.indexOf(id);
+  if (idx > -1) {
+    S.selectedInstagramExtras.splice(idx, 1); // Se clicares outra vez, remove da lista
+  } else {
+    S.selectedInstagramExtras.push(id); // Adiciona às ideias da semana
+  }
+  
+  save(); 
+  render(); 
 };
+
 /* app.js — PARTE 5 */
 function renderDashboard() {
   const totalGasto = monthSpend();
@@ -376,9 +384,28 @@ function renderDashboard() {
           }).join('')}
         </div>
       `}
+
+      <!-- 💡 NOVA ZONA: IDEIAS EXTRA ESCOLHIDAS DO INSTA / INTERNET -->
+      ${S.selectedInstagramExtras && S.selectedInstagramExtras.length > 0 ? `
+        <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd;">
+          <b style="color:#d62976; display:block; margin-bottom:8px; font-size:13px;">💡 Receitas Extra para Testar esta Semana:</b>
+          <ul style="padding-left:20px; margin:0; font-size:13px; color:#333; line-height:1.6;">
+            ${S.selectedInstagramExtras.map(id => {
+              const itemInspiracion = (S.instagramInspirations || []).find(x => x.id === id);
+              return itemInspiracion ? `
+                <li style="font-weight:500; margin-bottom:4px;">
+                  📸 ${itemInspiracion.name} <small style="color:#6c757d;">(${itemInspiracion.category})</small> 
+                  — <a href="${itemInspiracion.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none; font-size:11px;">Abrir Link ➡️</a>
+                </li>
+              ` : '';
+            }).join('')}
+          </ul>
+        </div>
+      ` : ''}
     </div>
   `;
 }
+
 
 function renderRecipes() {
   const all = getAllRecipes();
