@@ -258,118 +258,184 @@ window.toggleSelectInstagramRecipe = function(id) {
 };
 
 /* DASHBOARD */
-function renderDashboard() {
-  const totalGasto = monthSpend();
-  
-  if (!S.settings) S.settings = {};
-  if (!S.settings.kcalTu) S.settings.kcalTu = 1200;
-  if (!S.settings.kcalEle) S.settings.kcalEle = 1800;
-  if (!S.settings.protTu) S.settings.protTu = 135; 
-  if (!S.settings.protEle) S.settings.protEle = 200; 
-  if (!S.settings.carboTu) S.settings.carboTu = 80;
-  if (!S.settings.carboEle) S.settings.carboEle = 100;
-
-  const carneNecessaria = ((S.settings.protTu * 6) + (S.settings.protEle * 6)) / 1000; 
-  const hidratosNecessarios = ((S.settings.carboTu * 6) + (S.settings.carboEle * 6)) / 1000; 
-
-  window.changeMacrosPrompt = function() {
-    S.settings.kcalTu = parseInt(prompt("As tuas Calorias Diárias (Kcal):", S.settings.kcalTu)) || 1200;
-    S.settings.protTu = parseInt(prompt("A tua Proteína por Marmita (g):", S.settings.protTu)) || 135;
-    S.settings.carboTu = parseInt(prompt("Os teus Hidratos por Marmita (g):", S.settings.carboTu)) || 80;
-    
-    S.settings.kcalEle = parseInt(prompt("Calorias Diárias Dele (Kcal):", S.settings.kcalEle)) || 1800;
-    S.settings.protEle = parseInt(prompt("Proteína Dele por Marmita (g):", S.settings.protEle)) || 200;
-    S.settings.carboEle = parseInt(prompt("Hidratos Dele por Marmita (g):", S.settings.carboEle)) || 100;
-    
-    save(); 
-    render(); 
-  };
-
-  const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
-  const allRecs = getAllRecipes();
-
-  return `
-    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE</small>
-      <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">Foca em alimentos ricos em potássio e antioxidantes.</p>
-    </div>
-
-    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <small style="color:#6c757d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS</small>
-        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️</button>
-      </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
-          <b style="font-size:13px; color:#333; display:block;">👩‍🍳 A tua Ementa</b>
-          <span style="font-size:16px; font-weight:bold; color:#007bff;">${S.settings.kcalTu} Kcal</span>
-        </div>
-        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
-          <b style="font-size:13px; color:#333; display:block;">👨‍🦱 Marido</b>
-          <span style="font-size:16px; font-weight:bold; color:#6f42c1;">${S.settings.kcalEle} Kcal</span>
-        </div>
-      </div>
-    </div>
-
-    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
-      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS DESTE MÊS</small>
-      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura</button>
-    </div>
-
-    <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu da Semana</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar</button>
-      </div>
-      
-      ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido.</p>` : `
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-          ${dias.map((dia, idx) => {
-            const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
-            const lunchRec = allRecs.find(x => x.id === lunchId);
-            return `
-              <div style="padding:10px; background:#f8f9fa; border-radius:6px; border-left:4px solid #6f42c1; font-size:13px;">
-                <b style="color:#6f42c1; display:block; margin-bottom:4px;">📅 ${dia}</b>
-                <div>🍗 ${lunchRec ? lunchRec.name : 'Não definido'}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `}
-    </div>
-  `;
-}
-
-/* RECEITAS */
 function renderRecipes() {
   const all = getAllRecipes();
+  
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
 
   const query = (S.searchQuery || '').toLowerCase().trim();
   let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+
+  const currentF = S.currentRecipeFilter;
+  if (currentF !== 'todos') {
+    if (currentF === 'frango') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+    } else if (currentF === 'carne') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão')));
+    } else if (currentF === 'peixe') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+    } else if (currentF === 'lanches') {
+      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+    }
+  }
 
   window.setRecipeFilter = function(filterName) {
     S.currentRecipeFilter = filterName;
     save(); render();
   };
 
+  window.executeSearch = function(txt) {
+    S.searchQuery = txt;
+    save(); render();
+    setTimeout(() => {
+      const input = document.getElementById('recipe-search-bar');
+      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
+    }, 50);
+  };
+
   return `
-    <h3 style="margin:0 0 12px 0; color:#333;">❤️ Receitas (${filtered.length})</h3>
-    <div style="margin-bottom:12px;">
-      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar..." value="${S.searchQuery || ''}" oninput="S.searchQuery = this.value; save(); render();" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Receita</button>
     </div>
+
+    <div style="margin-bottom:12px;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
+      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">Doces 🍗 Frango</button>
+      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
+      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
+      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
+    </div>
+
+    ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
+
     ${filtered.map(r => `
-      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd;">
-        <b style="font-size:14px; color:#222;">${r.name}</b>
-        <div style="margin-top:8px; font-size:12px; color:#555;">
-          <span style="background:#e9ecef; color:#495057; padding:2px 6px; border-radius:4px;">${r.cat}</span>
+      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
+          <div style="display:flex; gap:5px;">
+            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
+            </button>
+          </div>
         </div>
-        ${r.ings ? `<div style="margin-top:6px; font-size:11px; color:#666;"><b>Ingredientes:</b> ${r.ings}</div>` : ''}
+        
+        <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
+          <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
+          ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
+          ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
+          ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
+          ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
+        </div>
+        
+        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
+
+        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
+          <div style="margin-bottom:6px;">
+            <b>🛒 Ingredientes necessários:</b>
+            <span style="color:#555;">${r.ings || 'Peito de frango, vegetais e temperos básicos a gosto.'}</span>
+          </div>
+          ${r.steps ? `<div><b>👩‍🍳 Modo de Fazer:</b> <span style="color:#555;">${r.steps}</span></div>` : ''}
+        </div>
       </div>
     `).join('')}
   `;
 }
+
+
+/* RECEITAS */
+function renderRecipes() {
+  const all = getAllRecipes();
+  
+  if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
+
+  const query = (S.searchQuery || '').toLowerCase().trim();
+  let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+
+  const currentF = S.currentRecipeFilter;
+  if (currentF !== 'todos') {
+    if (currentF === 'frango') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+    } else if (currentF === 'carne') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão')));
+    } else if (currentF === 'peixe') {
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+    } else if (currentF === 'lanches') {
+      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+    }
+  }
+
+  window.setRecipeFilter = function(filterName) {
+    S.currentRecipeFilter = filterName;
+    save(); render();
+  };
+
+  window.executeSearch = function(txt) {
+    S.searchQuery = txt;
+    save(); render();
+    setTimeout(() => {
+      const input = document.getElementById('recipe-search-bar');
+      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
+    }, 50);
+  };
+
+  return `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Receita</button>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+    </div>
+
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
+      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">Doces 🍗 Frango</button>
+      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
+      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
+      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
+    </div>
+
+    ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
+
+    ${filtered.map(r => `
+      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
+          <div style="display:flex; gap:5px;">
+            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+              ${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
+            </button>
+          </div>
+        </div>
+        
+        <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
+          <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
+          ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
+          ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
+          ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
+          ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
+        </div>
+        
+        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
+
+        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
+          <div style="margin-bottom:6px;">
+            <b>🛒 Ingredientes necessários:</b>
+            <span style="color:#555;">${r.ings || 'Peito de frango, vegetais e temperos básicos a gosto.'}</span>
+          </div>
+          ${r.steps ? `<div><b>👩‍🍳 Modo de Fazer:</b> <span style="color:#555;">${r.steps}</span></div>` : ''}
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
 
 /* DESPENSA */
 function renderPantry() {
