@@ -487,47 +487,113 @@ function renderGastos() {
     }
   });
 
+  // Função para dar baixa no item, atualizar a Despensa e somar o preço nos Gastos
+  window.payAndUpdatePantryItem = function(index, name, cat) {
+    const priceInput = document.getElementById(`price-gastos-${index}`);
+    const marketSelect = document.getElementById(`market-gastos-${index}`);
+    const price = parseFloat(priceInput ? priceInput.value : 0) || 0;
+    const market = marketSelect ? marketSelect.value : 'Lidl';
+
+    // 1. Atualiza a Despensa de volta para "Tenho" (has: true)
+    S.pantryStock[index].has = true;
+
+    // 2. Regista o preço no histórico detalhado
+    if (price > 0) {
+      S.invoices.push({
+        id: 'inv_' + Date.now(),
+        date: new Date().toISOString().slice(0, 10),
+        market: market,
+        total: price,
+        details: `${name} (${cat})`
+      });
+    }
+
+    save(); render();
+    alert(`💰 ${name} atualizado e somado aos gastos!`);
+  };
+
   window.clearHistoryGastos = function() {
-    if (confirm("Desejas limpar todo o histórico de gastos?")) {
+    if (confirm("Desejas limpar todo o teu histórico de gastos acumulado?")) {
       S.invoices = [];
       save(); render();
     }
   };
 
+  // Agrupa apenas os produtos em falta (has === false) para desenhar a lista por categorias com os preços
+  const groups = {};
+  S.pantryStock.forEach((item, index) => {
+    if (item && item.has === false) { 
+      if (!groups[item.cat]) groups[item.cat] = [];
+      groups[item.cat].push({ ...item, realIdx: index });
+    }
+  });
+
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">📊 Gastos Detalhados</h3>
+      <h3 style="margin:0; color:#333;">💰 Registo de Valores por Despensa</h3>
       <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar</button>
     </div>
 
+    <!-- CARD DO TOTAL DO MÊS -->
     <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px; text-align:center;">
-      <small style="color:#6c757d; font-weight:bold; display:block;">💰 INVESTIMENTO DESTE MÊS</small>
-      <h2 style="margin:5px 0 0 0; color:#28a745; font-size:28px;">€${totalMes.toFixed(2)}</h2>
+      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase;">💰 INVESTIMENTO EM REFEIÇÕES DESTE MÊS</small>
+      <h2 style="margin:5px 0 0 0; color:#28a745; font-size:26px;">€${totalMes.toFixed(2)}</h2>
     </div>
 
+    <!-- DIVISÃO POR SUPERMERCADOS -->
     <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; margin-bottom:15px; font-size:13px;">
-      <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px;">🛒 Divisão por Supermercado:</b>
-      ${Object.keys(mercadoTotais).length === 0 ? '<p style="color:#aaa; margin:0; font-size:12px;">Nenhum gasto registado ainda.</p>' : ''}
+      <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">🛒 Divisão por Estabelecimento:</b>
+      ${Object.keys(mercadoTotais).length === 0 ? '<p style="color:#aaa; margin:0; font-size:12px; text-align:center;">Nenhum gasto registado ainda.</p>' : ''}
       ${Object.keys(mercadoTotais).map(m => `
-        <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #f0f0f0;">
+        <div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed #f0f0f0;">
           <span>🏪 <b>${m}:</b></span>
           <span style="font-weight:700; color:#333;">€${mercadoTotais[m].toFixed(2)}</span>
         </div>
       `).join('')}
     </div>
 
-    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px;">📜 Histórico:</b>
-    <div style="display:flex; flex-direction:column; gap:8px;">
-      ${[...monthlyInvoices].reverse().map(item => `
-        <div style="background:#fff; padding:10px; border-radius:6px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
-          <div>
-            <b style="color:#222;">${item.details || 'Fatura Manual'}</b>
-            <small style="display:block; color:#888; font-size:10px;">🏪 ${item.market || 'Manual/Outro'} — 📅 ${item.date}</small>
+    <!-- A TUA LISTA DA DESPENSA EM FALTA COM OS VALORES PASSADA PARA AQUI -->
+    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📝 Colocar Preço nos Artigos Comprados:</b>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+      ${Object.keys(groups).length === 0 ? '<p style="color:#28a745; font-size:13px; font-weight:bold; text-align:center; background:#fff; padding:15px; border-radius:8px; border:1px solid #eee;">✅ Tudo controlado! Nenhum produto em falta na despensa.</p>' : ''}
+      
+      ${Object.keys(groups).map(cat => `
+        <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee;">
+          <b style="color:#007bff; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:4px;">${cat}</b>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            ${groups[cat].map(item => `
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; padding:4px 0;">
+                <span style="font-size:13px; font-weight:600; color:#333; flex:1;">${item.name}</span>
+                <div style="display:flex; align-items:center; gap:4px;">
+                  <select id="market-gastos-${item.realIdx}" style="padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px;">
+                    <option value="Lidl">Lidl</option>
+                    <option value="Mercadona">Mercadona</option>
+                    <option value="Continente">Continente</option>
+                    <option value="Pingo Doce">Pingo Doce</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                  <input type="number" id="price-gastos-${item.realIdx}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
+                  <button onclick="payAndUpdatePantryItem(${item.realIdx}, '${item.name}', '${item.cat}')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">✅</button>
+                </div>
+              </div>
+            `).join('')}
           </div>
-          <span style="font-weight:700; color:#28a745; font-size:14px;">+ €${(Number(item.total) || 0).toFixed(2)}</span>
         </div>
       `).join('')}
-      ${monthlyInvoices.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:10px;">Nenhum artigo registado neste mês.</p>' : ''}
+    </div>
+
+    <!-- HISTÓRICO CRONOLÓGICO -->
+    <b style="color:#495057; display:block; margin-bottom:8px; text-transform:uppercase; font-size:11px; letter-spacing:0.5px;">📜 Histórico Recente de Artigos Pagos:</b>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      ${[...monthlyInvoices].reverse().slice(0, 15).map(item => `
+        <div style="background:#fff; padding:8px 12px; border-radius:6px; border:1px solid #eee; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+          <div>
+            <b style="color:#222;">${item.details || 'Fatura Geral'}</b>
+            <small style="display:block; color:#888; font-size:10px;">🏪 ${item.market || 'Geral'} — 📅 ${item.date}</small>
+          </div>
+          <span style="font-weight:700; color:#28a745;">+ €${(Number(item.total) || 0).toFixed(2)}</span>
+        </div>
+      `).join('')}
     </div>
   `;
 }
