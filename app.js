@@ -2,15 +2,15 @@
 'use strict';
 
 const DEFAULT_RECIPES = [
-  { id: 'f_desfiado', name: 'Frango desfiado tradicional', cat: 'Almoço/Marmita', bimby: 'Programe 5 seg/Vel 4 Invertida para desfiar o frango cozido.', airfryer: '', calories: 280, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Alho (2 dentes), Azeite (1 col sopa), Sal', steps: 'Cozinhe o frango, deixe arrefecer e desfie. No Bimby, programe 5 seg/Vel 4 Invertida.' },
-  { id: 'f_mexicano', name: 'Frango mexicano', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 310, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Pimentões coloridos, Milho, Feijão, Tomate', steps: 'Refogue os vegetais, coloque o frango picado, temperado com cominho e paprika.' }
+  { id: 'f_desfiado', name: 'Frango desfiado tradicional', cat: 'Almoço/Marmita', bimby: 'Programe 5 seg/Vel 4 Invertida para desfiar o frango cozido.', airfryer: '', calories: 280, protein: 35, isSu[...] },
+  { id: 'f_mexicano', name: 'Frango mexicano', cat: 'Almoço/Marmita', bimby: '', airfryer: '', calories: 310, protein: 34, isSuggestion: true, ings: 'Peito de Frango (500g), Pimentões coloridos, Mil[...] }
 ];
 
 let S = null;
 let saveTimer = null;
 /* app.js — PARTE 2 (Metade A) */
 const EXTRA_RECIPES = [
-  { id: 'm_feij_1', name: 'Frango grelhado + arroz + feijão preto + brócolos', cat: 'Almoço/Marmita', proteinType: 'frango', bimby: '', airfryer: 'Grelhe o frango a 180°C por 12 min.', isSuggestion: true, calories: 350, protein: 38, ings: 'Peito de Frango (150g), Arroz (100g), Feijão Preto (80g), Brócolos (100g)', steps: 'Grelhe o frango, cozinhe o arroz e o feijão separadamente, e vapor os brócolos.' }
+  { id: 'm_feij_1', name: 'Frango grelhado + arroz + feijão preto + brócolos', cat: 'Almoço/Marmita', proteinType: 'frango', bimby: '', airfryer: 'Grelhe o frango a 180°C por 12 min.', isSuggestio[...] }
 ];
 
 /* app.js — PARTE 3 */
@@ -18,10 +18,10 @@ function getInitialPantry() {
   const list = [
     { name: 'Bife', cat: 'CARNE' }, { name: 'Costeletas de porco', cat: 'CARNE' }, { name: 'Hambúrguer', cat: 'CARNE' }, { name: 'Camarão', cat: 'CARNE' }, { name: 'Linguiça', cat: 'CARNE' },
     { name: 'Kiwi', cat: 'LEGUMES e FRUTAS' }, { name: 'Limão', cat: 'LEGUMES e FRUTAS' }, { name: 'Morango congelado', cat: 'LEGUMES e FRUTAS' }, { name: 'Melancia', cat: 'LEGUMES e FRUTAS' },
-    { name: 'Queijo ralado', cat: 'LATICÍNIOS' }, { name: 'Queijo camembert', cat: 'LATICÍNIOS' }, { name: 'Requeijão', cat: 'LATICÍNIOS' }, { name: 'Queijo para a quiche', cat: 'LATICÍNIOS' },
+    { name: 'Queijo ralado', cat: 'LATICÍNIOS' }, { name: 'Queijo camembert', cat: 'LATICÍNIOS' }, { name: 'Requeijão', cat: 'LATICÍNIOS' }, { name: 'Queijo para a quiche', cat: 'LATICÍNIOS' [...]
     { name: 'Desingordurante', cat: 'LIMPEZA' }, { name: 'Desentupidor', cat: 'LIMPEZA' }, { name: 'Sabão lavar roupa', cat: 'LIMPEZA' }, { name: 'Lixívia', cat: 'LIMPEZA' },
     { name: 'Massa de pizza', cat: 'CONGELADOS' }, { name: 'Batata congelada', cat: 'CONGELADOS' },
-    { name: 'Molho barbecue', cat: 'MOLHOS e TEMPEROS' }, { name: 'Azeite', cat: 'MOLHOS e TEMPEROS' }, { name: 'Alho em pó', cat: 'MOLHOS e TEMPEROS' }, { name: 'Cebola em pó', cat: 'MOLHOS e TEMPEROS' },
+    { name: 'Molho barbecue', cat: 'MOLHOS e TEMPEROS' }, { name: 'Azeite', cat: 'MOLHOS e TEMPEROS' }, { name: 'Alho em pó', cat: 'MOLHOS e TEMPEROS' }, { name: 'Cebola em pó', cat: 'MOLHOS e T[...] },
     { name: 'Cerveja', cat: 'BEBIDAS' }, { name: 'Água', cat: 'BEBIDAS' }, { name: 'Água das pedras', cat: 'BEBIDAS' }, { name: 'Refri', cat: 'BEBIDAS' },
     { name: 'Fubá', cat: 'GRÃOS E FARINHA' }, { name: 'Feijão', cat: 'GRÃOS E FARINHA' }, { name: 'Macarrão', cat: 'GRÃOS E FARINHA' }, { name: 'Arroz', cat: 'GRÃOS E FARINHA' },
     { name: 'Wrap', cat: 'PÃES E BISCOITOS' }, { name: 'Pão Rustik', cat: 'PÃES E BISCOITOS' }, { name: 'Biscoito maria', cat: 'PÃES E BISCOITOS' },
@@ -117,7 +117,7 @@ function render() {
   if (S.tab === 'gastos') view = renderGastos();
 
   root.innerHTML = `
-    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
+    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family[...]
       <div onclick="switchTab('dashboard')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
       <div onclick="switchTab('recipes')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
       <div onclick="switchTab('pantry')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Despensa</div>
@@ -211,29 +211,17 @@ window.addCustomShoppingItem = function() {
   save(); render();
 };
 
-window.togglePantry = function(index) {
+window.setPantryStatus = function(index, newStatus) {
   if (!S.pantryStock || !S.pantryStock[index]) return;
   const item = S.pantryStock[index];
   
-  // Se o item ainda não tiver a propriedade 'status', define com base no antigo 'has'
-  if (!item.status) {
-    if (item.has === true || item.has === undefined) {
-      item.status = 'tenho';
-    } else {
-      item.status = 'falta';
-    }
-  }
-
-  // FAZ O CICLO DOS 3 ESTADOS: Tenho (Verde) ➔ Falta (Vermelho) ➔ Não Usar (Cinza) ➔ Tenho (Verde)
-  if (item.status === 'tenho') {
-    item.status = 'falta';
-    item.has = false; // Manda para a lista de compras
-  } else if (item.status === 'falta') {
-    item.status = 'nao_usar';
-    item.has = true;  // Tira da lista de compras
-  } else {
-    item.status = 'tenho';
-    item.has = true;  // Mantém fora da lista de compras
+  item.status = newStatus;
+  if (newStatus === 'tenho') {
+    item.has = true;
+  } else if (newStatus === 'falta') {
+    item.has = false;
+  } else if (newStatus === 'nao_usar') {
+    item.has = true;
   }
 
   save(); 
@@ -292,7 +280,7 @@ function renderDashboard() {
     <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
         <small style="color:#6c757d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS</small>
-        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️</button>
+        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️</but[...]
       </div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
         <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
@@ -309,13 +297,13 @@ function renderDashboard() {
     <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
       <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS DESTE MÊS</small>
       <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
-      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Talão</button>
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">R[...]
     </div>
 
     <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu da Semana</h3>
-        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar</button>
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gera[...]
       </div>
       
       ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `<p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido.</p>` : `
@@ -351,7 +339,7 @@ function renderRecipes() {
   return `
     <h3 style="margin:0 0 12px 0; color:#333;">❤️ Receitas (${filtered.length})</h3>
     <div style="margin-bottom:12px;">
-      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar..." value="${S.searchQuery || ''}" oninput="S.searchQuery = this.value; save(); render();" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Pesquisar..." value="${S.searchQuery || ''}" oninput="S.searchQuery = this.value; save(); render();" style="width:100%; padding:8[...]
     </div>
     ${filtered.map(r => `
       <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd;">
@@ -373,32 +361,29 @@ function renderPantry() {
 
   return `
     <h3 style="margin-top:0; color:#333;">🗄️ Organização da Despensa</h3>
-    <p style="color:#6c757d; font-size:12px; margin-bottom:15px;">Clica no botão para mudar: Verde (Tenho) ➔ Vermelho (Falta) ➔ Cinza (Não usar).</p>
+    <p style="color:#6c757d; font-size:12px; margin-bottom:15px;">Clica nos botões para mudar o estado do item:</p>
     ${Object.keys(groups).map(cat => `
       <div style="margin-bottom:20px;">
         <b style="color:#495057; font-size:12px; text-transform:uppercase; display:block; margin-bottom:8px; letter-spacing:0.5px;">${cat}</b>
         ${groups[cat].map(item => {
           // Define a cor e o texto dinâmico com base nos 3 estados
-          let btnColor = '#28a745';
-          let btnText = '✅ Tenho';
+          let currentStatus = item.status || 'tenho';
           let textStyle = 'color: #333; text-decoration: none; font-weight:600;';
 
-          if (item.status === 'falta') {
-            btnColor = '#dc3545';
-            btnText = '❌ Falta';
+          if (currentStatus === 'falta') {
             textStyle = 'color: #c82333; text-decoration: none; font-weight:600;';
-          } else if (item.status === 'nao_usar') {
-            btnColor = '#6c757d';
-            btnText = '⚪ Não Usar';
+          } else if (currentStatus === 'nao_usar') {
             textStyle = 'color: #aaa; text-decoration: line-through; font-weight:normal;';
           }
 
           return `
-            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <div style="padding:10px; border-radius:6px; margin-bottom:5px; border:1px solid #f0f0f0; background:#fff; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
               <span style="${textStyle} font-size:13px;">${item.name}</span>
-              <button onclick="togglePantry(${item.realIndex})" style="background:${btnColor}; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-                ${btnText}
-              </button>
+              <div style="display:flex; gap:4px;">
+                <button onclick="setPantryStatus(${item.realIndex}, 'tenho')" style="background:#28a745; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'tenho' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">✅ Tenho</button>
+                <button onclick="setPantryStatus(${item.realIndex}, 'falta')" style="background:#dc3545; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'falta' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">❌ Falta</button>
+                <button onclick="setPantryStatus(${item.realIndex}, 'nao_usar')" style="background:#6c757d; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer; ${currentStatus === 'nao_usar' ? 'opacity:1; box-shadow: 0 0 0 2px #666;' : 'opacity:0.6;'}">⚪ Não Usar</button>
+              </div>
             </div>
           `;
         }).join('')}
@@ -476,7 +461,7 @@ function renderShopping() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#333;">🛒 Lista de Compras</h3>
-      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Artigo Extra</button>
+      <button onclick="addCustomShoppingItem()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">➕ Art[...]
     </div>
     
     <b style="color:#c82333; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🚨 Preciso de Comprar (Marcados como Falta):</b>
@@ -489,7 +474,7 @@ function renderShopping() {
         if (item.status !== 'falta' || alreadyInCart) return ''; 
         
         return `
-          <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+          <div onclick="putItemInCartFromPantry(${index}, '${item.name}', '${item.cat}')" style="padding:12px; background:#fdf2f2; border:1px solid #f5c6cb; border-radius:6px; cursor:pointer; fon[...]
             <span>🔸 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
             <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
           </div>
@@ -500,7 +485,7 @@ function renderShopping() {
     <b style="color:#495057; font-size:11px; text-transform:uppercase; display:block; margin-bottom:8px;">🏡 Outras Coisas / Lista Extra:</b>
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #eee; display:flex; flex-direction:column; gap:8px;">
       ${S.shoppingList.map(item => `
-        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; cursor:pointer; font-size:13px; display:flex; justify-content:space-between; align-items:center;">
+        <div onclick="putItemInCartFromExtra('${item.id}', '${item.name}', '${item.cat}')" style="padding:12px; background:#fff; border:1px solid #eee; border-radius:6px; cursor:pointer; font-siz[...]
           <span>🔹 ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.cat})</small></span>
           <span style="font-size:11px; color:#28a745; font-weight:normal;">🛒 Carrinho</span>
         </div>
@@ -567,7 +552,7 @@ function renderGastos() {
   return `
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
       <h3 style="margin:0; color:#333;">📊 Fecho de Caixa das Compras</h3>
-      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Limpar Histórico</button>
+      <button onclick="clearHistoryGastos()" style="background:#dc3545; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">🗑️ Li[...]
     </div>
 
     <!-- CARD DO TOTAL DO MÊS -->
@@ -613,8 +598,8 @@ function renderGastos() {
                 <option value="Pingo Doce">Pingo Doce</option>
                 <option value="Outro">Outro</option>
               </select>
-              <input type="number" id="price-cart-${idKey}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
-              <button onclick="finalizePriceAndCheckout('${idKey}', '${item.type}', '${item.name}', '${item.cat}', ${item.realIdx || 0})" style="background:#28a745; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:11px;">✅</button>
+              <input type="number" id="price-cart-${idKey}" placeholder="0.00€" step="0.01" style="width:60px; padding:4px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:[...]
+              <button onclick="finalizePriceAndCheckout('${idKey}', '${item.type}', '${item.name}', '${item.cat}', ${item.realIdx || 0})" style="background:#28a745; color:#fff; border:none; paddi[...]
             </div>
           </div>
         `;
@@ -672,7 +657,7 @@ function renderInstagram() {
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px;">
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Link</label>
-        <input type="url" id="insp-url-input" placeholder="https://instagram.com…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        <input type="url" id="insp-url-input" placeholder="https://instagram.com…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13p[...]
       </div>
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome</label>
@@ -680,9 +665,9 @@ function renderInstagram() {
       </div>
       <div style="margin-bottom:12px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Categoria</label>
-        <input type="text" id="insp-cat-input" value="Lanche" placeholder="Lanche ou Almoço/Marmita" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        <input type="text" id="insp-cat-input" value="Lanche" placeholder="Lanche ou Almoço/Marmita" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-b[...]
       </div>
-      <button onclick="saveInstagramInspiracionClassic()" style="background:#556b2f; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Guardar Receita</button>
+      <button onclick="saveInstagramInspiracionClassic()" style="background:#556b2f; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-s[...]
     </div>
 
     <div style="display:flex; flex-direction:column; gap:10px;">
@@ -699,7 +684,7 @@ function renderInstagram() {
               <a href="${item.link}" target="_blank" style="color:#008080; font-size:12px; word-break:break-all; text-decoration:none;">${item.link}</a>
             </div>
             <div style="display:flex; gap:8px; margin-top:10px;">
-              <button onclick="toggleSelectInstagramRecipe('${item.id}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">
+              <button onclick="toggleSelectInstagramRecipe('${item.id}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font[...]
                 ${isSelected ? '✕ Remover' : '🍽️ Escolher'}
               </button>
               <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; margin-left:auto;">✕</button>
