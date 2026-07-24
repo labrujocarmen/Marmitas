@@ -571,10 +571,10 @@ function renderShopping() {
 }
 
 function renderInstagram() {
-  // Converte a lista atual para ordem inversa (as mais recentes aparecem no topo)
+  // Converte a lista atual para ordem inversa
   const list = [...(S.instagramInspirations || [])].reverse();
 
-  // Função interna para guardar diretamente a partir das caixas de texto do ecrã
+  // Função clássica para guardar diretamente a partir das caixas de texto do ecrã
   window.saveInstagramInspiracionClassic = function() {
     const linkInput = document.getElementById('insp-url-input');
     const nameInput = document.getElementById('insp-name-input');
@@ -589,7 +589,6 @@ function renderInstagram() {
       return;
     }
 
-    // Regista na memória mantendo a data de hoje como tinhas no modelo antigo
     const hoje = new Date().toISOString().slice(0, 10);
     S.instagramInspirations.push({
       id: 'ig_' + Date.now(),
@@ -604,11 +603,11 @@ function renderInstagram() {
   };
 
   return `
-    <!-- FORMULÁRIO FIXO NO TOPO - IGUAL AO TEU ANTIGO VISUAL -->
+    <!-- FORMULÁRIO FIXO NO TOPO -->
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Link do Instagram ou Site</label>
-        <input type="url" id="insp-url-input" placeholder="https://instagram.com/p/…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        <input type="url" id="insp-url-input" placeholder="https://instagram.com…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
       </div>
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome da Receita / Notas</label>
@@ -623,12 +622,10 @@ function renderInstagram() {
       </button>
     </div>
 
-    <!-- LISTA EMPILHADA IGUAL AO FORMATO DA TUA SEGUNDA IMAGEM -->
+    <!-- LISTA EMPILHADA CORRIGIDA (EM INGLÊS) -->
     <div style="display:flex; flex-direction:column; gap:10px;">
       ${list.map(item => {
-        // Substitui a linha antiga da isSelected dentro do teu S.instagramInspirations.map por esta:
-const isSelected = S.selectedInstagramExtras && S.selectedInstagramExtras.includes(item.id);
- || (S.selectedSnacks && S.selectedSnacks.includes(item.id));
+        const isSelected = S.selectedInstagramExtras && S.selectedInstagramExtras.includes(item.id);
         return `
           <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
@@ -643,7 +640,7 @@ const isSelected = S.selectedInstagramExtras && S.selectedInstagramExtras.includ
             </div>
 
             <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
-              <button onclick="toggleSelectInstagramRecipe('${item.id}', '${item.category}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">
+              <button onclick="toggleSelectInstagramRecipe('${item.id}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">
                 ${isSelected ? '✕ Remover do Menu' : '🍽️ Escolher para a Semana'}
               </button>
               <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; margin-left:auto; padding:5px;">✕</button>
@@ -656,6 +653,7 @@ const isSelected = S.selectedInstagramExtras && S.selectedInstagramExtras.includ
     </div>
   `;
 }
+
 
 function render() {
   const root = document.getElementById('app-root') || document.body;
