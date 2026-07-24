@@ -148,7 +148,41 @@ function monthSpend() {
   return S.invoices.filter(i => i && i.date && i.date.startsWith(ym)).reduce((sum, i) => sum + i.total, 0);
 }
 /* app.js — PARTE 4 */
-window.switchTab = function(tab) { S.tab = tab; render(); };
+window.switchTab = function(tab) { 
+  S.tab = tab; 
+  render(); 
+};
+
+function render() {
+  const root = document.getElementById('app-root') || document.body;
+  if (!root) return;
+
+  let view = renderDashboard();
+  if (S.tab === 'recipes') view = renderRecipes();
+  if (S.tab === 'pantry') view = renderPantry();
+  if (S.tab === 'shopping') view = renderShopping();
+  if (S.tab === 'instagram') view = renderInstagram(); 
+  if (S.tab === 'gastos') view = renderGastos(); // Força a app a ler a nova aba de gastos
+
+  root.innerHTML = `
+    <!-- Barra de navegação com as 6 colunas completas lado a lado -->
+    <nav style="display:grid; grid-template-columns: repeat(6, 1fr); background:#111; color:#fff; font-size:10px; text-align:center; font-weight:bold; border-bottom:3px solid #007bff; font-family:sans-serif;">
+      <div onclick="switchTab('dashboard')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='dashboard'?'#007bff':''};">📋 Painel</div>
+      <div onclick="switchTab('recipes')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='recipes'?'#007bff':''};">📖 Receitas</div>
+      <div onclick="switchTab('pantry')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='pantry'?'#007bff':''};">🗄️ Despensa</div>
+      <div onclick="switchTab('shopping')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='shopping'?'#007bff':''};">🛒 Compras</div>
+      <div onclick="switchTab('instagram')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='instagram'?'#007bff':''};">📸 Insta</div>
+      <div onclick="switchTab('gastos')" style="padding:14px 1px; cursor:pointer; background:${S.tab==='gastos'?'#007bff':''};">💰 Gastos</div>
+    </nav>
+    <div style="padding:15px; max-width:600px; margin:0 auto; font-family:sans-serif; background:#f8f9fa; min-height:100vh; box-sizing:border-box;">
+      ${view}
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', initAppState);
+if (document.readyState === "complete" || document.readyState === "interactive") { initAppState(); }
+
 
 window.registerInvoice = function() {
   const val = parseFloat(prompt("Valor total do talão do supermercado (€):"));
