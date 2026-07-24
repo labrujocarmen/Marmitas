@@ -212,26 +212,34 @@ window.addCustomShoppingItem = function() {
 };
 
 window.togglePantry = function(index) {
+  if (!S.pantryStock || !S.pantryStock[index]) return;
   const item = S.pantryStock[index];
   
-  // Se o teu stock antigo ainda usar true/false na memória do PC, limpa para o novo modelo
-  if (item.has === true) item.status = 'tenho';
-  if (item.has === false && item.status === undefined) item.status = 'falta';
-
-  // Ciclo dos 3 Estados: Tenho ➔ Falta ➔ Não Usar ➔ Tenho
-  if (!item.status || item.status === 'tenho') {
-    item.status = 'falta';
-    item.has = false; // Mantém compatibilidade com o resto da app
-  } else if (item.status === 'falta') {
-    item.status = 'nao_usar';
-    item.has = true;  // Não usar significa que NÃO vai para a lista de compras
-  } else {
-    item.status = 'tenho';
-    item.has = true;
+  // Se o item ainda não tiver a propriedade 'status', define com base no antigo 'has'
+  if (!item.status) {
+    if (item.has === true || item.has === undefined) {
+      item.status = 'tenho';
+    } else {
+      item.status = 'falta';
+    }
   }
 
-  save(); render();
+  // FAZ O CICLO DOS 3 ESTADOS: Tenho (Verde) ➔ Falta (Vermelho) ➔ Não Usar (Cinza) ➔ Tenho (Verde)
+  if (item.status === 'tenho') {
+    item.status = 'falta';
+    item.has = false; // Manda para a lista de compras
+  } else if (item.status === 'falta') {
+    item.status = 'nao_usar';
+    item.has = true;  // Tira da lista de compras
+  } else {
+    item.status = 'tenho';
+    item.has = true;  // Mantém fora da lista de compras
+  }
+
+  save(); 
+  render();
 };
+
 
 
 window.togglePantry = function(index) {
