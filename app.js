@@ -257,7 +257,149 @@ window.toggleSelectInstagramRecipe = function(id) {
   render(); 
 };
 
-/* DASHBOARD */
+function renderDashboard() {
+  const totalGasto = monthSpend();
+  
+  // Garante que todas as configurações de macros existem na memória ou assume o padrão
+  if (!S.settings) S.settings = {};
+  if (!S.settings.kcalTu) S.settings.kcalTu = 1200;
+  if (!S.settings.kcalEle) S.settings.kcalEle = 1800;
+  if (!S.settings.protTu) S.settings.protTu = 135; 
+  if (!S.settings.protEle) S.settings.protEle = 200; 
+  if (!S.settings.carboTu) S.settings.carboTu = 80;   // Teu carboidrato padrão por marmita
+  if (!S.settings.carboEle) S.settings.carboEle = 100; // Carboidrato dele padrão por marmita
+
+  // AGORA OS HIDRATOS SÃO DINÂMICOS: recalculam automaticamente com base no que definires
+  const carneNecessaria = ((S.settings.protTu * 6) + (S.settings.protEle * 6)) / 1000; 
+  const hidratosNecessarios = ((S.settings.carboTu * 6) + (S.settings.carboEle * 6)) / 1000; 
+
+  // Função do botão atualizada para incluir também a edição dos hidratos/carbos
+  window.changeMacrosPrompt = function() {
+    S.settings.kcalTu = parseInt(prompt("As tuas Calorias Diárias (Kcal):", S.settings.kcalTu)) || 1200;
+    S.settings.protTu = parseInt(prompt("A tua Proteína por Marmita (g):", S.settings.protTu)) || 135;
+    S.settings.carboTu = parseInt(prompt("Os teus Hidratos por Marmita (g):", S.settings.carboTu)) || 80;
+    
+    S.settings.kcalEle = parseInt(prompt("Calorias Diárias Dele (Kcal):", S.settings.kcalEle)) || 1800;
+    S.settings.protEle = parseInt(prompt("Proteína Dele por Marmita (g):", S.settings.protEle)) || 200;
+    S.settings.carboEle = parseInt(prompt("Hidratos Dele por Marmita (g):", S.settings.carboEle)) || 100;
+    
+    save(); 
+    render(); 
+  };
+
+  const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira'];
+  const allRecs = getAllRecipes();
+
+  return `
+    <!-- 🩸 BLOCO DE SAÚDE: ALIMENTAÇÃO LIPEDEMA -->
+    <div style="background:#fff0f6; border-left:5px solid #d62976; padding:15px; border-radius:8px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+      <small style="color:#c2185b; font-weight:bold; display:block;">🩺 GUIA DE SAÚDE & LIPEDEMA</small>
+      <p style="margin:5px 0; font-size:12px; color:#555; line-height:1.4;">
+        Para controlar a inflamação e a retenção, foca em alimentos ricos em <b>potássio e antioxidantes</b>. 
+        Tenta incluir no teu stock semanal:
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:8px;">
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥝 Kiwi / Frutos Vermelhos</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥑 Abacate / Espinafres</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🥦 Brócolos / Beterraba</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🐟 Salmão / Sardinha</span>
+        <span style="background:#fff; border:1px solid #f8bbd0; color:#c2185b; font-size:11px; padding:2px 6px; border-radius:4px; font-weight:500;">🫒 Azeite / Tomate</span>
+      </div>
+    </div>
+
+    <!-- 📊 PAINEL DE METAS METABÓLICAS COM BOTÃO DE CONFIGURAÇÃO -->
+    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <small style="color:#6c757d; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">⚖️ METAS SEMANAIS DA FAMÍLIA</small>
+        <button onclick="changeMacrosPrompt()" style="background:#f0f0f0; border:1px solid #ccc; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">⚙️ Alterar</button>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
+          <b style="font-size:13px; color:#333; display:block;">👩‍🍳 A tua Ementa</b>
+          <span style="font-size:16px; font-weight:bold; color:#007bff;">${S.settings.kcalTu} Kcal</span>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🍗 120g Prot<br>🥦 40% Legumes<br>🍚 ${S.settings.carboTu}g Hidratos</small>
+        </div>
+        <div style="background:#f1f3f5; padding:10px; border-radius:6px; text-align:center;">
+          <b style="font-size:13px; color:#333; display:block;">👨‍🦱 Marido (6 Marmitas)</b>
+          <span style="font-size:16px; font-weight:bold; color:#6f42c1;">${S.settings.kcalEle} Kcal</span>
+          <small style="display:block; font-size:10px; color:#666; margin-top:4px;">🥩 200g Prot<br>🥦 40% Legumes<br>🍚 ${S.settings.carboEle}g Hidratos</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🛒 WIDGET DE GESTÃO DE COMPRAS EM MASSA -->
+    <div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+      <small style="color:#6c757d; font-weight:bold; display:block; text-transform:uppercase; letter-spacing:0.5px;">📦 GUIA DE COMPRAS DE MATÉRIA-PRIMA</small>
+      <p style="margin:5px 0 12px 0; font-size:12px; color:#666;">Para garantires <b>12 marmitas</b> variadas com 2 a 3 tipos de proteína diferentes:</p>
+      <div style="font-size:13px; color:#333; line-height:1.6;">
+        🔸 <b>Proteínas Totais:</b> Compra pelo menos <span style="color:#28a745; font-weight:bold;">${carneNecessaria.toFixed(1)} kg</span> de carne/peixe limpos.<br>
+        🔸 <b>Hidratos Totais:</b> Prepara aprox. <span style="color:#007bff; font-weight:bold;">${hidratosNecessarios.toFixed(1)} kg</span> de base (Arroz/Batata/Feijão).<br>
+        🔸 <b>Legumes Totais:</b> Garante uma proporção de 40% de vegetais ao vapor ou assados.
+      </div>
+    </div>
+
+    <!-- 💰 CONTROLO MONETÁRIO SIMPLIFICADO -->
+    <div style="background:#eef9f0; border-left:5px solid #28a745; padding:15px; border-radius:8px; margin-bottom:15px;">
+      <small style="color:#6c757d; font-weight:bold; display:block;">💰 GASTOS REAIS REGISTADOS DESTE MÊS</small>
+      <h2 style="margin:5px 0 10px 0; color:#28a745;">€${totalGasto.toFixed(2)}</h2>
+      <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura do Lidl / Continente / Mercadona</button>
+    </div>
+
+    <!-- 🍱 SELEÇÃO SEMANAL COM DIAS DA SEMANA -->
+    <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu Escolhido para a Semana</h3>
+        <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu Aleatório</button>
+      </div>
+      
+      ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `
+        <p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>
+      ` : `
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+          ${dias.map((dia, idx) => {
+            const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
+            const snackId = S.selectedSnacks ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
+            
+            const lunchRec = allRecs.find(x => x.id === lunchId);
+            const snackRec = allRecs.find(x => x.id === snackId);
+
+            return `
+              <div style="padding:10px; background:#f8f9fa; border-radius:6px; border-left:4px solid #6f42c1; font-size:13px;">
+                <b style="color:#6f42c1; display:block; margin-bottom:4px; font-size:14px;">📅 ${dia}</b>
+                <div style="color:#222; margin-bottom:3px;">
+                  🍗 <b>Almoço:</b> ${lunchRec ? lunchRec.name : '<span style="color:#aaa;">Não definido</span>'}
+                </div>
+                <div style="color:#555;">
+                  🥪 <b>Lanche:</b> ${snackRec ? snackRec.name : '<span style="color:#aaa;">Não definido</span>'}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `}
+
+      <!-- 💡 IDEIAS EXTRA ESCOLHIDAS DO INSTA / INTERNET -->
+      ${S.selectedInstagramExtras && S.selectedInstagramExtras.length > 0 ? `
+        <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd;">
+          <b style="color:#d62976; display:block; margin-bottom:8px; font-size:13px;">💡 Receitas Extra para Testar esta Semana:</b>
+          <ul style="padding-left:20px; margin:0; font-size:13px; color:#333; line-height:1.6;">
+            ${S.selectedInstagramExtras.map(id => {
+              const itemInspiracion = (S.instagramInspirations || []).find(x => x.id === id);
+              return itemInspiracion ? `
+                <li style="font-weight:500; margin-bottom:4px;">
+                  📸 ${itemInspiracion.name} <small style="color:#6c757d;">(${itemInspiracion.category})</small> 
+                  — <a href="${itemInspiracion.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none; font-size:11px;">Abrir Link ➡️</a>
+                </li>
+              ` : '';
+            }).join('')}
+          </ul>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+
 function renderRecipes() {
   const all = getAllRecipes();
   
