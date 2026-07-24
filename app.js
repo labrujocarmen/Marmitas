@@ -408,18 +408,19 @@ function renderRecipes() {
   const query = (S.searchQuery || '').toLowerCase().trim();
   let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
 
-  const currentF = S.currentRecipeFilter;
+    const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
     if (currentF === 'frango') {
       filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
     } else if (currentF === 'carne') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('picadinho') || r.name.toLowerCase().includes('chili') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('jardineira') || r.name.toLowerCase().includes('empadão')));
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('picada') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('empadão') || r.name.toLowerCase().includes('jardineira')));
     } else if (currentF === 'peixe') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum')));
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum') || r.name.toLowerCase().includes('pescada') || r.name.toLowerCase().includes('camarão')));
     } else if (currentF === 'lanches') {
-      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
+      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche' || r.cat.toLowerCase().includes('lanche'));
     }
   }
+
 
   window.setRecipeFilter = function(filterName) {
     S.currentRecipeFilter = filterName;
@@ -785,54 +786,33 @@ window.addNewRecipe = function() {
   const name = prompt("Nome da nova receita:");
   if (!name) return;
   
-  // Pergunta a categoria para o sistema saber onde a arrumar automaticamente
-  const cat = prompt("Categoria (digita: Almoço/Marmita ou Lanches):", "Almoço/Marmita") || "Almoço/Marmita";
-  const ings = prompt("Escreve os ingredientes necessários (separados por vírgula):") || "Ingredientes a gosto.";
+  const cat = prompt("Categoria (digite exatamente: Almoço/Marmita ou Lanches):", "Almoço/Marmita") || "Almoço/Marmita";
+  const ings = prompt("Escreve os ingredientes necessários:") || "Ingredientes a gosto.";
   const steps = prompt("Escreve o modo de fazer passo a passo:") || "Preparar a gosto.";
-
-  // Identifica o tipo de proteína pelo nome para o gerador misto aleatório funcionar bem
-  let proteinType = 'frango';
+  
+  // SOLUÇÃO: Deteta a proteína automaticamente por palavras-chave para nunca falhar nas abas
+  let proteinType = 'frango'; 
   const lowName = name.toLowerCase();
-  if (lowName.includes('carne') || lowName.includes('vaca') || lowName.includes('porco') || lowName.includes('almôndegas')) proteinType = 'carne';
-  if (lowName.includes('peixe') || lowName.includes('bacalhau') || lowName.includes('salmão') || lowName.includes('atum')) proteinType = 'peixe';
-  if (cat.toLowerCase().includes('lanche')) proteinType = 'lanche';
+  
+  if (cat.toLowerCase().includes('lanche')) {
+    proteinType = 'lanche';
+  } else if (lowName.includes('carne') || lowName.includes('vaca') || lowName.includes('porco') || lowName.includes('picada') || lowName.includes('almôndegas') || lowName.includes('lombo') || lowName.includes('empadão') || lowName.includes('jardineira')) {
+    proteinType = 'carne';
+  } else if (lowName.includes('peixe') || lowName.includes('bacalhau') || lowName.includes('salmão') || lowName.includes('atum') || lowName.includes('pescada') || lowName.includes('camarão')) {
+    proteinType = 'peixe';
+  }
 
   S.myRecipes.push({ 
     id: 'my_' + Date.now(), 
     name: name, 
     cat: cat, 
-    proteinType: proteinType,
+    proteinType: proteinType, 
     ings: ings, 
-    steps: steps,
+    steps: steps, 
     isSuggestion: false 
   });
   
   save(); 
   render();
-  alert("✨ Nova receita guardada com sucesso no teu Livro!");
+  alert("✨ Nova receita guardada com sucesso e ativa nas abas!");
 };
-
-window.toggleSelectRecipe = function(id) {
-  if (!S.selectedLunches) S.selectedLunches = [];
-  if (!S.selectedSnacks) S.selectedSnacks = [];
-
-  const all = getAllRecipes();
-  const found = all.find(x => x.id === id);
-  const isLanche = found && found.cat && found.cat.toLowerCase().includes('lanche');
-
-  if (isLanche) {
-    // Se for um Lanche, gere e guarda na gaveta de lanches da semana
-    const idx = S.selectedSnacks.indexOf(id);
-    if (idx > -1) S.selectedSnacks.splice(idx, 1);
-    else S.selectedSnacks.push(id);
-  } else {
-    // Se for Almoço/Marmita, guarda na gaveta de almoços da semana
-    const idx = S.selectedLunches.indexOf(id);
-    if (idx > -1) S.selectedLunches.splice(idx, 1);
-    else S.selectedLunches.push(id);
-  }
-
-  save(); 
-  render();
-};
-
