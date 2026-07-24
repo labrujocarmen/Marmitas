@@ -529,26 +529,90 @@ function renderShopping() {
 }
 
 function renderInstagram() {
+  // Converte a lista atual para ordem inversa (as mais recentes aparecem no topo)
+  const list = [...(S.instagramInspirations || [])].reverse();
+
+  // Função interna para guardar diretamente a partir das caixas de texto do ecrã
+  window.saveInstagramInspiracionClassic = function() {
+    const linkInput = document.getElementById('insp-url-input');
+    const nameInput = document.getElementById('insp-name-input');
+    const catInput = document.getElementById('insp-cat-input');
+
+    const link = linkInput ? linkInput.value.trim() : '';
+    const name = nameInput ? nameInput.value.trim() : '';
+    const category = catInput ? catInput.value.trim() : 'Lanche';
+
+    if (!name || !link) {
+      alert("Por favor, preencha o Nome e o Link da receita!");
+      return;
+    }
+
+    // Regista na memória mantendo a data de hoje como tinhas no modelo antigo
+    const hoje = new Date().toISOString().slice(0, 10);
+    S.instagramInspirations.push({
+      id: 'ig_' + Date.now(),
+      name: name,
+      category: category,
+      link: link,
+      date: hoje
+    });
+
+    save();
+    render();
+  };
+
   return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-      <h3 style="margin:0; color:#333;">📸 Links do Instagram</h3>
-      <button onclick="addInstagramLink()" style="background:#d62976; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:13px;">🔗 Guardar Link</button>
+    <!-- FORMULÁRIO FIXO NO TOPO - IGUAL AO TEU ANTIGO VISUAL -->
+    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Link do Instagram ou Site</label>
+        <input type="url" id="insp-url-input" placeholder="https://instagram.com/p/…" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome da Receita / Notas</label>
+        <input type="text" id="insp-name-input" placeholder="ex: wrap de frango com molho de iogurte" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:12px; font-weight:bold; color:#495057; margin-bottom:4px;">Categoria</label>
+        <input type="text" id="insp-cat-input" value="Lanche" placeholder="Lanche ou Almoço/Marmita" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+      </div>
+      <button onclick="saveInstagramInspiracionClassic()" style="background:#556b2f; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:13px; text-transform:uppercase;">
+        📌 Guardar inspiração
+      </button>
     </div>
-    
-    <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #eee;">
-      ${S.instagramInspirations.map(item => `
-        <div style="padding:12px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-          <div style="font-size:14px; color:#333;">
-            <b>${item.name}</b> - <span style="color:#6c757d;">${item.category}</span> - 
-            <a href="${item.link}" target="_blank" style="color:#d62976; font-weight:bold; text-decoration:none;">Link</a>
+
+    <!-- LISTA EMPILHADA IGUAL AO FORMATO DA TUA SEGUNDA IMAGEM -->
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${list.map(item => {
+        const isSelected = S.selectedLunches.includes(item.id) || (S.selectedSnacks && S.selectedSnacks.includes(item.id));
+        return `
+          <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+              <span style="font-weight:700; color:#222; font-size:14px; flex:1; padding-right:10px;">
+                ${item.name} <small style="color:#6c757d; font-weight:normal;">(${item.category})</small>
+              </span>
+              <span style="font-size:11px; color:#aaa; white-space:nowrap;">${item.date || ''}</span>
+            </div>
+            
+            <div style="margin-top:4px;">
+              <a href="${item.link}" target="_blank" style="color:#008080; font-size:12px; word-break:break-all; text-decoration:none; font-weight:500;">${item.link}</a>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:10px; align-items:center;">
+              <button onclick="toggleSelectInstagramRecipe('${item.id}', '${item.category}')" style="background:${isSelected ? '#dc3545':'#556b2f'}; color:#fff; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer;">
+                ${isSelected ? '✕ Remover do Menu' : '🍽️ Escolher para a Semana'}
+              </button>
+              <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; margin-left:auto; padding:5px;">✕</button>
+            </div>
           </div>
-          <button onclick="deleteInstagramLink('${item.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px;">❌</button>
-        </div>
-      `).join('')}
-      ${S.instagramInspirations.length === 0 ? '<p style="color:#888; font-size:13px; margin:0; padding:10px 0;">Nenhuma inspiração guardada. Clica em "Guardar Link".</p>' : ''}
+        `;
+      }).join('')}
+      
+      ${list.length === 0 ? '<div style="text-align:center; color:#888; font-size:13px; padding:20px;">📌 Sem inspirações ainda.</div>' : ''}
     </div>
   `;
 }
+
 function render() {
   const root = document.getElementById('app-root') || document.body;
   if (!root) return;
