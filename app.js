@@ -630,7 +630,9 @@ function renderInstagram() {
     <!-- LISTA EMPILHADA IGUAL AO FORMATO DA TUA SEGUNDA IMAGEM -->
     <div style="display:flex; flex-direction:column; gap:10px;">
       ${list.map(item => {
-        const isSelected = S.selectedLunches.includes(item.id) || (S.selectedSnacks && S.selectedSnacks.includes(item.id));
+        // Substitui a linha antiga da isSelected dentro do teu S.instagramInspirations.map por esta:
+const isSelected = S.selectedInstagramExtras && S.selectedInstagramExtras.includes(item.id);
+ || (S.selectedSnacks && S.selectedSnacks.includes(item.id));
         return `
           <div style="background:#fff; padding:12px; border-radius:8px; border:1px solid #eee; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
