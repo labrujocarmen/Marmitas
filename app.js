@@ -782,14 +782,22 @@ function renderInstagram() {
 }
 
 window.addNewRecipe = function() {
-  const name = prompt("Nome da nova receita:");
-  if (!name) return;
-  
-  const cat = prompt("Categoria (digite exatamente: Almoço/Marmita ou Lanches):", "Almoço/Marmita") || "Almoço/Marmita";
-  const ings = prompt("Escreve os ingredientes necessários:") || "Ingredientes a gosto.";
-  const steps = prompt("Escreve o modo de fazer passo a passo:") || "Preparar a gosto.";
-  
-  // SOLUÇÃO: Deteta a proteína automaticamente por palavras-chave para nunca falhar nas abas
+  const nameInput = document.getElementById('new-rec-name');
+  const catSelect = document.getElementById('new-rec-cat');
+  const ingsInput = document.getElementById('new-rec-ings');
+  const stepsInput = document.getElementById('new-rec-steps');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const cat = catSelect ? catSelect.value : 'Almoço/Marmita';
+  const ings = ingsInput ? ingsInput.value.trim() : 'Ingredientes a gosto.';
+  const steps = stepsInput ? stepsInput.value.trim() : 'Preparar a gosto.';
+
+  if (!name) {
+    alert("Por favor, introduza pelo menos o Nome da receita!");
+    return;
+  }
+
+  // Deteta a proteína automaticamente por palavras-chave para organizar as abas sozito
   let proteinType = 'frango'; 
   const lowName = name.toLowerCase();
   
@@ -801,6 +809,8 @@ window.addNewRecipe = function() {
     proteinType = 'peixe';
   }
 
+  // Guarda na tua gaveta pessoal de receitas criadas à mão
+  if (!S.myRecipes) S.myRecipes = [];
   S.myRecipes.push({ 
     id: 'my_' + Date.now(), 
     name: name, 
@@ -811,10 +821,27 @@ window.addNewRecipe = function() {
     isSuggestion: false 
   });
   
+  // Limpa as caixas de texto após guardar para ficar pronto para a próxima
+  if (nameInput) nameInput.value = '';
+  if (ingsInput) ingsInput.value = '';
+  if (stepsInput) stepsInput.value = '';
+
   save(); 
   render();
-  alert("✨ Nova receita guardada com sucesso e ativa nas abas!");
-}; 
+  alert("✨ Nova receita guardada com sucesso e adicionada ao teu livro!");
+};
+
+// NOVA FUNÇÃO: Para poderes eliminar receitas criadas por ti se te enganares!
+window.deleteCustomRecipe = function(id) {
+  if (confirm("Tens a certeza que queres eliminar permanentemente esta receita do teu livro?")) {
+    S.myRecipes = S.myRecipes.filter(r => r.id !== id);
+    // Remove também das seleções da semana caso estivesse ativa
+    if (S.selectedLunches) S.selectedLunches = S.selectedLunches.filter(x => x !== id);
+    if (S.selectedSnacks) S.selectedSnacks = S.selectedSnacks.filter(x => x !== id);
+    save(); 
+    render();
+  }
+};
 
 window.toggleSelectRecipe = function(id) {
   // Inicializa os arrays na memória caso ainda não existam
