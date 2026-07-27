@@ -478,40 +478,39 @@ function renderDashboard() {
       <button onclick="registerInvoice()" style="background:#28a745; color:#fff; padding:8px 12px; border:none; border-radius:4px; font-weight:bold; cursor:pointer; width:100%; font-size:13px;">Registar Fatura do Lidl / Continente / Mercadona</button>
     </div>
 
-    <!-- 🍱 SELEÇÃO SEMANAL COM DIAS DA SEMANA -->
+       <!-- 🍱 SELEÇÃO SEMANAL COM DIAS DA SEMANA (ATUALIZADO) -->
     <div style="background:#fff; padding:15px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); border:1px solid #eee;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <h3 style="margin:0; color:#333; font-size:15px;">🍱 Menu Escolhido para a Semana</h3>
         <button onclick="generateWeeklyMenu()" style="background:#6f42c1; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">✨ Gerar Menu Aleatório</button>
       </div>
       
-      ${(!S.selectedLunches || S.selectedLunches.length === 0) ? `
-        <p style="color:#888; font-size:13px; margin:0;">Nenhum prato escolhido. Clica em "Gerar Menu Aleatório" para rodar as tuas sugestões sem repetir carnes.</p>
-      ` : `
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
-          ${dias.map((dia, idx) => {
-            const lunchId = S.selectedLunches[idx % S.selectedLunches.length];
-            const snackId = S.selectedSnacks ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
-            
-            const lunchRec = allRecs.find(x => x.id === lunchId);
-            const snackRec = allRecs.find(x => x.id === snackId);
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+        ${dias.map((dia, idx) => {
+          // Inicializa e lê de forma 100% segura as 4 gavetas de refeições da semana
+          const lunchId = S.selectedLunches && S.selectedLunches.length > 0 ? S.selectedLunches[idx % S.selectedLunches.length] : null;
+          const snackId = S.selectedSnacks && S.selectedSnacks.length > 0 ? S.selectedSnacks[idx % S.selectedSnacks.length] : null;
+          const saladId = S.selectedSalads && S.selectedSalads.length > 0 ? S.selectedSalads[idx % S.selectedSalads.length] : null;
+          const dessertId = S.selectedDesserts && S.selectedDesserts.length > 0 ? S.selectedDesserts[idx % S.selectedDesserts.length] : null;
 
-            return `
-              <div style="padding:10px; background:#f8f9fa; border-radius:6px; border-left:4px solid #6f42c1; font-size:13px;">
-                <b style="color:#6f42c1; display:block; margin-bottom:4px; font-size:14px;">📅 ${dia}</b>
-                <div style="color:#222; margin-bottom:3px;">
-                  🍗 <b>Almoço:</b> ${lunchRec ? lunchRec.name : '<span style="color:#aaa;">Não definido</span>'}
-                </div>
-                <div style="color:#555;">
-                  🥪 <b>Lanche:</b> ${snackRec ? snackRec.name : '<span style="color:#aaa;">Não definido</span>'}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `}
+          const lunchRec = allRecs.find(x => x.id === lunchId);
+          const snackRec = allRecs.find(x => x.id === snackId);
+          const saladRec = allRecs.find(x => x.id === saladId);
+          const dessertRec = allRecs.find(x => x.id === dessertId);
 
-      <!-- 💡 IDEIAS EXTRA ESCOLHIDAS DO INSTA / INTERNET -->
+          return `
+            <div style="padding:10px; background:#f8f9fa; border-radius:6px; border-left:4px solid #6f42c1; font-size:13px; margin-bottom:4px;">
+              <b style="color:#6f42c1; display:block; margin-bottom:6px; font-size:14px;">📅 ${dia}</b>
+              <div style="color:#222; margin-bottom:3px;">🍗 <b>Almoço:</b> ${lunchRec ? lunchRec.name : '<span style="color:#aaa;">Não definido</span>'}</div>
+              <div style="color:#28a745; margin-bottom:3px;">🥗 <b>Salada:</b> ${saladRec ? saladRec.name : '<span style="color:#aaa;">Não definida</span>'}</div>
+              <div style="color:#555; margin-bottom:3px;">🥪 <b>Lanche:</b> ${snackRec ? snackRec.name : '<span style="color:#aaa;">Não definido</span>'}</div>
+              <div style="color:#e2185b;">🍰 <b>Sobremesa:</b> ${dessertRec ? dessertRec.name : '<span style="color:#aaa;">Não definida</span>'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <!-- 💡 IDEIAS EXTRA ESCOLHIDAS DO INSTA / INTERNET (MANTIDO E PROTEGIDO!) -->
       ${S.selectedInstagramExtras && S.selectedInstagramExtras.length > 0 ? `
         <div style="margin-top:15px; padding-top:15px; border-top:1px dashed #ddd;">
           <b style="color:#d62976; display:block; margin-bottom:8px; font-size:13px;">💡 Receitas Extra para Testar esta Semana:</b>
@@ -533,6 +532,7 @@ function renderDashboard() {
 }
 
 
+
 function renderRecipes() {
   const all = getAllRecipes();
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
@@ -550,41 +550,47 @@ function renderRecipes() {
       filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum') || r.name.toLowerCase().includes('pescada') || r.name.toLowerCase().includes('camarão')));
     } else if (currentF === 'lanches') {
       filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche' || r.cat.toLowerCase().includes('lanche'));
+    } else if (currentF === 'saladas') {
+      filtered = filtered.filter(r => r.cat === 'Saladas' || r.name.toLowerCase().includes('salada'));
+    } else if (currentF === 'sobremesas') {
+      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.name.toLowerCase().includes('sobremesa') || r.name.toLowerCase().includes('doce') || r.name.toLowerCase().includes('mousse') || r.name.toLowerCase().includes('pudim'));
     }
   }
 
   window.setRecipeFilter = function(filterName) { S.currentRecipeFilter = filterName; save(); render(); };
   window.executeSearch = function(txt) { S.searchQuery = txt; save(); render(); setTimeout(() => { const input = document.getElementById('recipe-search-bar'); if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); } }, 50); };
 
-  return `
+    return `
     <h3 style="margin-top:0; color:#333;">❤️ Livro de Receitas Favoritas</h3>
 
-    <!-- 📝 NOVO FORMULÁRIO FIXO NO TOPO - MUITO MELHOR QUE POPUPS -->
+    <!-- Formulário Fixo no Topo com Novas Categorias -->
     <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
       <b style="display:block; font-size:12px; font-weight:bold; color:#007bff; margin-bottom:8px; text-transform:uppercase;">➕ Criar e Incluir Nova Receita:</b>
       
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
         <div>
           <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome do Prato</label>
-          <input type="text" id="new-rec-name" placeholder="Ex: Risoto de cogumelos" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+          <input type="text" id="new-rec-name" placeholder="Ex: Salada de grão à Rita Lobo" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
         </div>
         <div>
           <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Tipo de Refeição</label>
           <select id="new-rec-cat" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px; height:34px;">
             <option value="Almoço/Marmita">Almoço / Marmita</option>
             <option value="Lanches">Lanches</option>
+            <option value="Saladas">Saladas</option>
+            <option value="Sobremesas">Sobremesas</option>
           </select>
         </div>
       </div>
       
       <div style="margin-bottom:10px;">
         <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Ingredientes Necessários</label>
-        <input type="text" id="new-rec-ings" placeholder="Ex: Arroz arbóreo, cogumelos, cebola, parmesão" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        <input type="text" id="new-rec-ings" placeholder="Escreve os ingredientes..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
       </div>
       
       <div style="margin-bottom:12px;">
         <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Modo de Fazer / Passos</label>
-        <input type="text" id="new-rec-steps" placeholder="Ex: Fazer um refogado, juntar o arroz e ir deitando caldo lentamente..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        <input type="text" id="new-rec-steps" placeholder="Escreve o passo a passo..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
       </div>
       
       <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:13px; text-transform:uppercase;">
@@ -594,23 +600,31 @@ function renderRecipes() {
 
     <!-- Barra de Pesquisa -->
     <div style="margin-bottom:12px;">
-      <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
+      <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
     </div>
 
-    <!-- Abas de Proteína -->
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px;">
-      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">✨ Todos</button>
-      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">种类 🍗 Frango</button>
-      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🥩 Carne</button>
-      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🐟 Peixe</button>
-      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🥛 Lanches</button>
+    <!-- Abas de Proteína Expandidas -->
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
+      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍗 Frango</button>
+      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
+      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
+      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
+      <button onclick="setRecipeFilter('saladas')" style="background:${currentF==='saladas'?'#28a745':'#eee'}; color:${currentF==='saladas'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥗 Saladas</button>
+      <button onclick="setRecipeFilter('sobremesas')" style="background:${currentF==='sobremesas'?'#e2185b':'#eee'}; color:${currentF==='sobremesas'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍰 Sobremesas</button>
     </div>
-
+`;
+  return root.innerHTML = `
+    <!-- Aqui entra o topo que colaste na Parte 2 -->
+  ` + `
     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
     ${filtered.map(r => {
-      const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id));
-      // Verifica se a receita foi criada à mão (não é do sistema nem do Insta) para exibir o botão de apagar
+      // Verifica de forma segura se o prato está selecionado em alguma das 4 gavetas da semana
+      const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || 
+                         (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ||
+                         (S.selectedSalads && S.selectedSalads.includes(r.id)) ||
+                         (S.selectedDesserts && S.selectedDesserts.includes(r.id));
       const isCustom = !r.isSuggestion && !r.isFromInstagram;
 
       return `
@@ -621,7 +635,7 @@ function renderRecipes() {
               <button onclick="toggleSelectRecipe('${r.id}')" style="background:${isSelected ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 12px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
                 ${isSelected ? 'Remover' : 'Escolher'}
               </button>
-              <!-- BOTÃO DE EXCLUIR: Só aparece nas receitas criadas por ti! -->
+              <!-- ✕ Opção de Excluir ativa para as tuas receitas personalizadas -->
               ${isCustom ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; padding:0 4px; font-weight:bold;">✕</button>` : ''}
             </div>
           </div>
@@ -629,8 +643,6 @@ function renderRecipes() {
             <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
             ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
             ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
-            ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
-            ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
           </div>
           <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; line-height:1.4;">
             <div style="margin-bottom:4px;"><b>🛒 Ingredientes:</b> <span style="color:#555;">${r.ings || 'A gosto.'}</span></div>
@@ -641,7 +653,6 @@ function renderRecipes() {
     }).join('')}
   `;
 }
-
 
 /* DESPENSA */
 function renderPantry() {
@@ -996,31 +1007,27 @@ window.deleteCustomRecipe = function(id) {
 };
 
 window.toggleSelectRecipe = function(id) {
-  // Inicializa os arrays na memória caso ainda não existam
   if (!S.selectedLunches) S.selectedLunches = [];
   if (!S.selectedSnacks) S.selectedSnacks = [];
+  if (!S.selectedSalads) S.selectedSalads = [];
+  if (!S.selectedDesserts) S.selectedDesserts = [];
 
-  // Puxa a lista unificada de todas as receitas da app (incluindo as do Insta)
   const all = getAllRecipes();
   const found = all.find(x => x.id === id);
-  
-  // Verifica se o prato pertence à categoria de lanches
-  const isLanche = found && found.cat && found.cat.toLowerCase().includes('lanche');
+  const catLower = found && found.cat ? found.cat.toLowerCase() : '';
 
-  if (isLanche) {
+  if (catLower.includes('lanche')) {
     const idx = S.selectedSnacks.indexOf(id);
-    if (idx > -1) {
-      S.selectedSnacks.splice(idx, 1); // Se já estava selecionado, remove (volta a Verde)
-    } else {
-      S.selectedSnacks.push(id); // Se não estava, adiciona (muda para Vermelho)
-    }
+    if (idx > -1) S.selectedSnacks.splice(idx, 1); else S.selectedSnacks.push(id);
+  } else if (catLower.includes('salada')) {
+    const idx = S.selectedSalads.indexOf(id);
+    if (idx > -1) S.selectedSalads.splice(idx, 1); else S.selectedSalads.push(id);
+  } else if (catLower.includes('sobremesa')) {
+    const idx = S.selectedDesserts.indexOf(id);
+    if (idx > -1) S.selectedDesserts.splice(idx, 1); else S.selectedDesserts.push(id);
   } else {
     const idx = S.selectedLunches.indexOf(id);
-    if (idx > -1) {
-      S.selectedLunches.splice(idx, 1); // Se já estava selecionado, remove
-    } else {
-      S.selectedLunches.push(id); // Se não estava, adiciona
-    }
+    if (idx > -1) S.selectedLunches.splice(idx, 1); else S.selectedLunches.push(id);
   }
 
   save(); 
