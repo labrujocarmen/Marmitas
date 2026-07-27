@@ -815,3 +815,36 @@ window.addNewRecipe = function() {
   render();
   alert("✨ Nova receita guardada com sucesso e ativa nas abas!");
 }; 
+
+window.toggleSelectRecipe = function(id) {
+  // Inicializa os arrays na memória caso ainda não existam
+  if (!S.selectedLunches) S.selectedLunches = [];
+  if (!S.selectedSnacks) S.selectedSnacks = [];
+
+  // Puxa a lista unificada de todas as receitas da app (incluindo as do Insta)
+  const all = getAllRecipes();
+  const found = all.find(x => x.id === id);
+  
+  // Verifica se o prato pertence à categoria de lanches
+  const isLanche = found && found.cat && found.cat.toLowerCase().includes('lanche');
+
+  if (isLanche) {
+    const idx = S.selectedSnacks.indexOf(id);
+    if (idx > -1) {
+      S.selectedSnacks.splice(idx, 1); // Se já estava selecionado, remove (volta a Verde)
+    } else {
+      S.selectedSnacks.push(id); // Se não estava, adiciona (muda para Vermelho)
+    }
+  } else {
+    const idx = S.selectedLunches.indexOf(id);
+    if (idx > -1) {
+      S.selectedLunches.splice(idx, 1); // Se já estava selecionado, remove
+    } else {
+      S.selectedLunches.push(id); // Se não estava, adiciona
+    }
+  }
+
+  save(); 
+  render();
+};
+
