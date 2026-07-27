@@ -44,8 +44,23 @@
   <!-- O ponto central onde o teu novo motor unificado vai desenhar os ecrãs -->
   <div id="app-root"></div>
 
-  <!-- Carrega APENAS o teu novo ficheiro correto e unificado -->
+  <!-- Carrega o teu ficheiro de lógica unificado -->
   <script src="app.js"></script>
+
+  <!-- MOTOR DE ATIVAÇÃO DA APP REAL (OFFLINE E INSTALAÇÃO) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('App Marmitas pronta para instalar!', reg))
+          .catch(err => console.log('Erro ao ativar motor da App:', err));
+      });
+    }
+  </script>
+  
+</body>
+</html>
+
   
 </body>
 </html>
