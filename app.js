@@ -615,12 +615,11 @@ function renderRecipes() {
     </div>
 `;
   return root.innerHTML = `
-    <!-- Aqui entra o topo que colaste na Parte 2 -->
-  ` + `
+    return `
+    <!-- Aqui entra o topo que já tinhas colado -->
     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
     ${filtered.map(r => {
-      // Verifica de forma segura se o prato está selecionado em alguma das 4 gavetas da semana
       const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || 
                          (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ||
                          (S.selectedSalads && S.selectedSalads.includes(r.id)) ||
@@ -635,7 +634,6 @@ function renderRecipes() {
               <button onclick="toggleSelectRecipe('${r.id}')" style="background:${isSelected ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 12px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
                 ${isSelected ? 'Remover' : 'Escolher'}
               </button>
-              <!-- ✕ Opção de Excluir ativa para as tuas receitas personalizadas -->
               ${isCustom ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; padding:0 4px; font-weight:bold;">✕</button>` : ''}
             </div>
           </div>
@@ -653,6 +651,7 @@ function renderRecipes() {
     }).join('')}
   `;
 }
+
 
 /* DESPENSA */
 function renderPantry() {
