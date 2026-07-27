@@ -402,13 +402,12 @@ function renderDashboard() {
 
 function renderRecipes() {
   const all = getAllRecipes();
-  
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
 
   const query = (S.searchQuery || '').toLowerCase().trim();
   let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
 
-      const currentF = S.currentRecipeFilter;
+  const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
     if (currentF === 'frango') {
       filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
@@ -421,75 +420,95 @@ function renderRecipes() {
     }
   }
 
-  window.setRecipeFilter = function(filterName) {
-    S.currentRecipeFilter = filterName;
-    save(); render();
-  };
+  window.setRecipeFilter = function(filterName) { S.currentRecipeFilter = filterName; save(); render(); };
+  window.executeSearch = function(txt) { S.searchQuery = txt; save(); render(); setTimeout(() => { const input = document.getElementById('recipe-search-bar'); if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); } }, 50); };
 
-  window.executeSearch = function(txt) {
-    S.searchQuery = txt;
-    save(); render();
-    setTimeout(() => {
-      const input = document.getElementById('recipe-search-bar');
-      if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); }
-    }, 50);
-  };
+  return `
+    <h3 style="margin-top:0; color:#333;">❤️ Livro de Receitas Favoritas</h3>
 
-    return `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-      <h3 style="margin:0; color:#333;">❤️ Receitas Favoritas (${filtered.length})</h3>
-      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:12px;">➕ Incluir Receita</button>
+    <!-- 📝 NOVO FORMULÁRIO FIXO NO TOPO - MUITO MELHOR QUE POPUPS -->
+    <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+      <b style="display:block; font-size:12px; font-weight:bold; color:#007bff; margin-bottom:8px; text-transform:uppercase;">➕ Criar e Incluir Nova Receita:</b>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <div>
+          <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Nome do Prato</label>
+          <input type="text" id="new-rec-name" placeholder="Ex: Risoto de cogumelos" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Tipo de Refeição</label>
+          <select id="new-rec-cat" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px; height:34px;">
+            <option value="Almoço/Marmita">Almoço / Marmita</option>
+            <option value="Lanches">Lanches</option>
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Ingredientes Necessários</label>
+        <input type="text" id="new-rec-ings" placeholder="Ex: Arroz arbóreo, cogumelos, cebola, parmesão" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+      </div>
+      
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:11px; font-weight:bold; color:#495057; margin-bottom:4px;">Modo de Fazer / Passos</label>
+        <input type="text" id="new-rec-steps" placeholder="Ex: Fazer um refogado, juntar o arroz e ir deitando caldo lentamente..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box; font-size:13px;">
+      </div>
+      
+      <button onclick="addNewRecipe()" style="background:#007bff; color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; width:100%; font-size:13px; text-transform:uppercase;">
+        💾 Guardar Receita no Livro
+      </button>
     </div>
 
-    <!-- BARRA DE PESQUISA COM ÍCONE -->
+    <!-- Barra de Pesquisa -->
     <div style="margin-bottom:12px;">
       <input type="text" id="recipe-search-bar" placeholder="🔍 Digita para pesquisar receita (ex: caril, sandes)..." value="${S.searchQuery || ''}" oninput="executeSearch(this.value)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;">
     </div>
 
-    <!-- 🏷️ BOTÕES DE SEPARAÇÃO POR ABAS COLORIDAS -->
-    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px; -webkit-overflow-scrolling:touch;">
-      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">✨ Todos</button>
-      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍗 Frango</button>
-      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥩 Carne</button>
-      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🐟 Peixe</button>
-      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥛 Lanches</button>
+    <!-- Abas de Proteína -->
+    <div style="display:flex; gap:4px; overflow-x:auto; padding-bottom:8px; margin-bottom:15px;">
+      <button onclick="setRecipeFilter('todos')" style="background:${currentF==='todos'?'#007bff':'#eee'}; color:${currentF==='todos'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">✨ Todos</button>
+      <button onclick="setRecipeFilter('frango')" style="background:${currentF==='frango'?'#20c997':'#eee'}; color:${currentF==='frango'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">种类 🍗 Frango</button>
+      <button onclick="setRecipeFilter('carne')" style="background:${currentF==='carne'?'#6f42c1':'#eee'}; color:${currentF==='carne'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🥩 Carne</button>
+      <button onclick="setRecipeFilter('peixe')" style="background:${currentF==='peixe'?'#17a2b8':'#eee'}; color:${currentF==='peixe'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🐟 Peixe</button>
+      <button onclick="setRecipeFilter('lanches')" style="background:${currentF==='lanches'?'#fd7e14':'#eee'}; color:${currentF==='lanches'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer;">🥛 Lanches</button>
     </div>
 
     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
-    ${filtered.map(r => `
-      <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b style="font-size:14px; color:#222; max-width:70%; display:block;">${r.name}</b>
-          <div style="display:flex; gap:5px;">
-            <button onclick="toggleSelectRecipe('${r.id}')" style="background:${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 8px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
-              ${(S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ? 'Remover' : 'Escolher'}
-            </button>
-          </div>
-        </div>
-        
-        <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
-          <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
-          ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
-          ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
-          ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
-          ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
-        </div>
-        
-        ${r.link ? `<div style="margin-top:8px;"><a href="${r.link}" target="_blank" style="color:#d62976; font-size:12px; font-weight:bold; text-decoration:none;">➡️ Ver Vídeo da Receita</a></div>` : ''}
+    ${filtered.map(r => {
+      const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || (S.selectedSnacks && S.selectedSnacks.includes(r.id));
+      // Verifica se a receita foi criada à mão (não é do sistema nem do Insta) para exibir o botão de apagar
+      const isCustom = !r.isSuggestion && !r.isFromInstagram;
 
-        <!-- 🛒 CAIXA CINZENTA DE INGREDIENTES E PASSO A PASSO SEMPRE VISÍVEL -->
-        <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; color:#444; line-height:1.4;">
-          <div style="margin-bottom:6px;">
-            <b>🛒 Ingredientes necessários:</b>
-            <span style="color:#555;">${r.ings || 'Peito de frango, vegetais e temperos básicos a gosto.'}</span>
+      return `
+        <div style="background:#fff; padding:12px; border-radius:8px; margin-bottom:12px; border:1px solid #ddd; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b style="font-size:14px; color:#222;">${r.name}</b>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button onclick="toggleSelectRecipe('${r.id}')" style="background:${isSelected ? '#dc3545':'#28a745'}; color:#fff; border:none; padding:5px 12px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">
+                ${isSelected ? 'Remover' : 'Escolher'}
+              </button>
+              <!-- BOTÃO DE EXCLUIR: Só aparece nas receitas criadas por ti! -->
+              ${isCustom ? `<button onclick="deleteCustomRecipe('${r.id}')" style="background:none; border:none; color:#dc3545; cursor:pointer; font-size:14px; padding:0 4px; font-weight:bold;">✕</button>` : ''}
+            </div>
           </div>
-          ${r.steps ? `<div><b>👩‍🍳 Modo de Fazer:</b> <span style="color:#555;">${r.steps}</span></div>` : ''}
+          <div style="margin-top:8px; display:flex; gap:5px; flex-wrap:wrap;">
+            <span style="background:#e9ecef; color:#495057; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">${r.cat}</span>
+            ${r.isSuggestion ? '<span style="background:#e2f0d9; color:#155724; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">💡 Sistema</span>' : ''}
+            ${r.isFromInstagram ? '<span style="background:#fce4ec; color:#c2185b; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">📸 Insta</span>' : ''}
+            ${r.bimby ? '<span style="background:#20c997; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🤖 Bimby</span>' : ''}
+            ${r.airfryer ? '<span style="background:#fd7e14; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">🍟 Airfryer</span>' : ''}
+          </div>
+          <div style="background:#f8f9fa; padding:10px; font-size:12px; border-radius:6px; margin-top:10px; border:1px solid #f0f0f0; line-height:1.4;">
+            <div style="margin-bottom:4px;"><b>🛒 Ingredientes:</b> <span style="color:#555;">${r.ings || 'A gosto.'}</span></div>
+            <div><b>👩‍🍳 Passo a Passo:</b> <span style="color:#555;">${r.steps || 'A gosto.'}</span></div>
+          </div>
         </div>
-      </div>
-    `).join('')}
+      `;
+    }).join('')}
   `;
 }
+
 
 /* DESPENSA */
 function renderPantry() {
