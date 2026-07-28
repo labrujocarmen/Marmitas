@@ -616,10 +616,9 @@ function renderRecipes() {
     </div>
 `;
   
-    return `
-    ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
+     {filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
-    ${filtered.map(r => {
+    {filtered.map(r => {
       const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || 
                          (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ||
                          (S.selectedSalads && S.selectedSalads.includes(r.id)) ||
