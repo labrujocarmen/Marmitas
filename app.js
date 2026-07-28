@@ -614,7 +614,7 @@ function renderRecipes() {
       <button onclick="setRecipeFilter('sobremesas')" style="background:${currentF==='sobremesas'?'#e2185b':'#eee'}; color:${currentF==='sobremesas'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍰 Sobremesas</button>
     </div>
 `;
-  return root.innerHTML = `
+  
     return `
     <!-- Aqui entra o topo que já tinhas colado -->
     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
