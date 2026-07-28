@@ -1,5 +1,5 @@
 /* app.js — VERSÃO COMPLETA E FUNCIONAL */
-'use strict';
+'use strict'; 
 
 const DEFAULT_RECIPES = [
   { id: 'f_desfiado', name: 'Frango desfiado tradicional', cat: 'Almoço/Marmita', bimby: 'Programe 5 seg/Vel 4 Invertida para desfiar o frango cozido.', airfryer: '', calories: 280, protein: 35, isSuggestion: true, ings: 'Peito de Frango (500g), Sal, Água', steps: 'Cozinhe o frango e desfie.' },
