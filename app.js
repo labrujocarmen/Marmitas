@@ -614,11 +614,10 @@ function renderRecipes() {
       <button onclick="setRecipeFilter('saladas')" style="background:${currentF==='saladas'?'#28a745':'#eee'}; color:${currentF==='saladas'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🥗 Saladas</button>
       <button onclick="setRecipeFilter('sobremesas')" style="background:${currentF==='sobremesas'?'#e2185b':'#eee'}; color:${currentF==='sobremesas'?'#fff':'#333'}; border:none; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap;">🍰 Sobremesas</button>
     </div>
-`;
   
-     {filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
+     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
-    {filtered.map(r => {
+    ${filtered.map(r => {
       const isSelected = (S.selectedLunches && S.selectedLunches.includes(r.id)) || 
                          (S.selectedSnacks && S.selectedSnacks.includes(r.id)) ||
                          (S.selectedSalads && S.selectedSalads.includes(r.id)) ||
