@@ -617,7 +617,6 @@ function renderRecipes() {
 `;
   
     return `
-    <!-- Aqui entra o topo que já tinhas colado -->
     ${filtered.length === 0 ? '<p style="color:#888; font-size:12px; text-align:center; padding:20px 0;">Nenhuma receita encontrada nesta aba.</p>' : ''}
 
     ${filtered.map(r => {
