@@ -543,18 +543,18 @@ function renderRecipes() {
 
   const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
-    if (currentF === 'frango') {
+     if (currentF === 'frango') {
       filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
     } else if (currentF === 'carne') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('picada') || r.name.toLowerCase().includes('almôndegas') || r.name.toLowerCase().includes('lombo') || r.name.toLowerCase().includes('empadão') || r.name.toLowerCase().includes('jardineira')));
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco')));
     } else if (currentF === 'peixe') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('salmão') || r.name.toLowerCase().includes('atum') || r.name.toLowerCase().includes('pescada') || r.name.toLowerCase().includes('camarão')));
+      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau')));
     } else if (currentF === 'lanches') {
       filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche' || r.cat.toLowerCase().includes('lanche'));
     } else if (currentF === 'saladas') {
       filtered = filtered.filter(r => r.cat === 'Saladas' || r.name.toLowerCase().includes('salada'));
     } else if (currentF === 'sobremesas') {
-      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.name.toLowerCase().includes('sobremesa') || r.name.toLowerCase().includes('doce') || r.name.toLowerCase().includes('mousse') || r.name.toLowerCase().includes('pudim'));
+      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.name.toLowerCase().includes('sobremesa'));
     }
   }
 
