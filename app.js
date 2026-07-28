@@ -538,7 +538,7 @@ function renderRecipes() {
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
 
   const query = (S.searchQuery || '').toLowerCase().trim();
-  let filtered = all.filter(r => r.name.toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+   let filtered = allRecs.filter(r => (r.name || '').toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
 
   const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
