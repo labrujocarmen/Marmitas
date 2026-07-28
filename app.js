@@ -241,8 +241,8 @@ function getAllRecipes() {
     steps: 'Seguir os passos do site original.'
   }));
 
-  return [...(S.myRecipes || []), ...igRecipes, ...(typeof DEFAULT_RECIPES !== 'undefined' ? DEFAULT_RECIPES : []), ...(typeof EXTRA_RECIPES !== 'undefined' ? EXTRA_RECIPES : [])];
-}
+   return [...(S.myRecipes || []), ...igRecipes, ...DEFAULT_RECIPES, ...EXTRA_RECIPES];
+
 
 function monthSpend() {
   const ym = new Date().toISOString().slice(0,7);
