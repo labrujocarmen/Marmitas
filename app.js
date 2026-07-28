@@ -242,7 +242,7 @@ function getAllRecipes() {
   }));
 
    return [...(S.myRecipes || []), ...igRecipes, ...DEFAULT_RECIPES, ...EXTRA_RECIPES];
-
+} 
 
 function monthSpend() {
   const ym = new Date().toISOString().slice(0,7);
