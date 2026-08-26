@@ -294,46 +294,59 @@ window.registerInvoice = function() {
 window.generateWeeklyMenu = function() {
   const all = getAllRecipes();
   if (all.length === 0) return;
-  
-  const frangos = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
-  const carnes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne')));
-  const peixes = all.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe')));
-  const lanches = all.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche');
 
+  // 1. PEGAR OS INGREDIENTES VERDES DA DESPENSA (Estado 'Tenho')
+  const ingredientesDisponiveis = S.pantryStock 
+    ? S.pantryStock.filter(item => item.status === 'tenho' || item.status === 'Tenho').map(item => item.name.toLowerCase())
+    : [];
+
+  // 2. FILTRAR AS RECEITAS REAIS QUE COMBINAM COM A DESPENSA
+  const receitasFiltradas = all.filter(r => {
+    if (ingredientesDisponiveis.length === 0) return true; // Se a despensa estiver vazia, mostra tudo
+    
+    // Verifica se o nome da receita ou os ingredientes batem com o que está verde
+    const nomeBate = ingredientesDisponiveis.some(ing => r.name.toLowerCase().includes(ing));
+    const ingsBatem = r.ings ? r.ings.some(ing => ingredientesDisponiveis.includes(ing.name.toLowerCase())) : false;
+    
+    return nomeBate || ingsBatem;
+  });
+
+  // Separar em Almoços (Categorias reais do seu JSON) e Jantares Leves (Lanches)
+  const almocosValidos = receitasFiltradas.filter(r => ['bovina', 'frango', 'porco', 'peixe', 'peru'].includes(r.cat) || r.cat === 'Almoço/Marmita');
+  const lanchesValidos = receitasFiltradas.filter(r => r.cat === 'Lanches' || r.cat === 'lanches' || r.type === 'wrap' || r.type === 'tosta' || r.cat === 'Lanche');
+
+  // Se o filtro da despensa for demasiado rigoroso e der menos de 2 opções, usa o banco total para não quebrar a app
+  const poolAlmocos = almocosValidos.length >= 2 ? almocosValidos : all.filter(r => ['bovina', 'frango', 'porco', 'peixe', 'peru'].includes(r.cat) || r.cat === 'Almoço/Marmita');
+  const poolLanches = lanchesValidos.length >= 2 ? lanchesValidos : all.filter(r => r.cat === 'Lanches' || r.type === 'wrap' || r.type === 'tosta' || r.cat === 'Lanche');
+
+  // Sorteio (Shuffle) dos pratos disponíveis
+  const almocosSorteados = [...poolAlmocos].sort(() => 0.5 - Math.random());
+  const lanchesSorteados = [...poolLanches].sort(() => 0.5 - Math.random());
+
+  // 3. MONTAR O MENU DO MARIDO (5 Almoços)
   let escolhaAlmocos = [];
+  for (let i = 0; i < 5; i++) {
+    const r = almocosSorteados[i % almocosSorteados.length];
+    escolhaAlmocos.push(r);
+  }
   
-  if (frangos.length >= 2) {
-    const fSh = [...frangos].sort(() => 0.5 - Math.random());
-    escolhaAlmocos.push(fSh[0].id, fSh[1].id);
-  } else if (frangos.length > 0) {
-    escolhaAlmocos.push(frangos[0].id);
-  }
+  // Guardar os IDs ordenados aleatoriamente no estado global
+  S.selectedLunches = escolhaAlmocos.sort(() => 0.5 - Math.random()).map(r => r.id);
 
-  if (carnes.length >= 1) {
-    const cSh = [...carnes].sort(() => 0.5 - Math.random());
-    escolhaAlmocos.push(cSh[0].id);
+  // 4. MONTAR OS JANTARES LEVES (5 Lanches Variados - Sem repetição infinita)
+  let escolhaLanches = [];
+  for (let i = 0; i < 5; i++) {
+    const d = lanchesSorteados[i % lanchesSorteados.length];
+    escolhaLanches.push(d.id);
   }
+  S.selectedSnacks = escolhaLanches;
 
-  if (peixes.length >= 1) {
-    const pSh = [...peixes].sort(() => 0.5 - Math.random());
-    escolhaAlmocos.push(pSh[0].id);
-  }
-
-  if (lanches.length >= 2) {
-    const lSh = [...lanches].sort(() => 0.5 - Math.random());
-    S.selectedSnacks = [lSh[0].id, lSh[1].id, lSh[0].id, lSh[1].id, lSh[0].id];
-  } else if (lanches.length > 0) {
-    S.selectedSnacks = Array(5).fill(lanches[0].id);
-  }
-
-  if (escolhaAlmocos.length > 0) {
-    S.selectedLunches = escolhaAlmocos.sort(() => 0.5 - Math.random());
-  }
-
-  save(); 
+  // 5. SALVAR E RENDERIZAR (Mantendo a estrutura nativa da sua App)
+  save();
   render();
-  alert("✨ Menu da semana gerado com sucesso!");
+  alert("✨ Menu inteligente baseado na Despensa gerado com sucesso!");
 };
+
 
 window.addInstagramLink = function() {
   const name = prompt("Nome da receita do Instagram:");
