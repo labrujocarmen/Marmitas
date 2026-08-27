@@ -564,25 +564,39 @@ function renderRecipes() {
   if (!S.currentRecipeFilter) S.currentRecipeFilter = 'todos';
 
   const query = (S.searchQuery || '').toLowerCase().trim();
-    let filtered = all.filter(r => (r.name || '').toLowerCase().includes(query) || (r.cat || '').toLowerCase().includes(query));
+  
+  // Função auxiliar para remover acentos na pesquisa (Resolve o problema do Hambúrguer)
+  const normalizar = (txt) => (txt || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const queryNormalizada = normalizar(query);
 
+  // 1. FILTRO DE BUSCA INTELIGENTE (Não falha com acentos nem maiúsculas)
+  let filtered = all.filter(r => {
+    const nomeNorm = normalizar(r.name);
+    const catNorm = normalizar(r.cat);
+    const typeNorm = normalizar(r.type);
+    
+    // Procura no nome, na categoria ou no tipo da receita
+    return nomeNorm.includes(queryNormalizada) || catNorm.includes(queryNormalizada) || typeNorm.includes(queryNormalizada);
+  });
 
+  // 2. MAPEAMENTO DE CATEGORIAS AUTOMÁTICO (Traduz o JSON para os botões da App)
   const currentF = S.currentRecipeFilter;
   if (currentF !== 'todos') {
-     if (currentF === 'frango') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'frango' || r.name.toLowerCase().includes('frango')));
+    if (currentF === 'frango') {
+      filtered = filtered.filter(r => r.cat === 'frango' || r.cat === 'peru' || (r.name && r.name.toLowerCase().includes('frango')));
     } else if (currentF === 'carne') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'carne' || r.name.toLowerCase().includes('carne') || r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco')));
+      filtered = filtered.filter(r => r.cat === 'bovina' || r.cat === 'porco' || r.cat === 'Carne' || (r.name && (r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('hamburguer') || r.name.toLowerCase().includes('carne'))));
     } else if (currentF === 'peixe') {
-      filtered = filtered.filter(r => r.cat === 'Almoço/Marmita' && (r.proteinType === 'peixe' || r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau')));
+      filtered = filtered.filter(r => r.cat === 'peixe' || (r.name && (r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('sardinha'))));
     } else if (currentF === 'lanches') {
-      filtered = filtered.filter(r => r.cat === 'Lanches' || r.proteinType === 'lanche' || r.cat.toLowerCase().includes('lanche'));
+      filtered = filtered.filter(r => r.cat === 'Lanches' || r.cat === 'lanches' || r.type === 'wrap' || r.type === 'tosta' || (r.name && r.name.toLowerCase().includes('lanche')));
     } else if (currentF === 'saladas') {
-      filtered = filtered.filter(r => r.cat === 'Saladas' || r.name.toLowerCase().includes('salada'));
+      filtered = filtered.filter(r => r.cat === 'Saladas' || r.cat === 'saladas' || (r.name && r.name.toLowerCase().includes('salada')));
     } else if (currentF === 'sobremesas') {
-      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.name.toLowerCase().includes('sobremesa'));
+      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.cat === 'sobremesas' || (r.name && r.name.toLowerCase().includes('sobremesa')));
     }
   }
+
 
   window.setRecipeFilter = function(filterName) { S.currentRecipeFilter = filterName; save(); render(); };
   window.executeSearch = function(txt) { S.searchQuery = txt; save(); render(); setTimeout(() => { const input = document.getElementById('recipe-search-bar'); if (input) { input.focus(); input.setSelectionRange(txt.length, txt.length); } }, 50); };
