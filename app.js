@@ -311,17 +311,30 @@ window.generateWeeklyMenu = function() {
     return nomeBate || ingsBatem;
   });
 
-  // Separar em Almoços (Categorias reais do seu JSON) e Jantares Leves (Lanches)
-  const almocosValidos = receitasFiltradas.filter(r => ['bovina', 'frango', 'porco', 'peixe', 'peru'].includes(r.cat) || r.cat === 'Almoço/Marmita');
-  const lanchesValidos = receitasFiltradas.filter(r => r.cat === 'Lanches' || r.cat === 'lanches' || r.type === 'wrap' || r.type === 'tosta' || r.cat === 'Lanche');
+   // 2. SISTEMA DE PREFERÊNCIA DINÂMICO (Não esconde nada, apenas dá prioridade)
+  // O código analisa todas as receitas e coloca as que têm ingredientes verdes no topo
+  const poolOrdenado = [...all].sort((a, b) => {
+    if (ingredientesDisponiveis.length === 0) return 0;
 
-  // Se o filtro da despensa for demasiado rigoroso e der menos de 2 opções, usa o banco total para não quebrar a app
-  const poolAlmocos = almocosValidos.length >= 2 ? almocosValidos : all.filter(r => ['bovina', 'frango', 'porco', 'peixe', 'peru'].includes(r.cat) || r.cat === 'Almoço/Marmita');
-  const poolLanches = lanchesValidos.length >= 2 ? lanchesValidos : all.filter(r => r.cat === 'Lanches' || r.type === 'wrap' || r.type === 'tosta' || r.cat === 'Lanche');
+    // Conta quantos ingredientes verdes cada receita tem
+    const aTemVerde = (a.ings && a.ings.some(ing => ingredientesDisponiveis.includes(ing.name.toLowerCase()))) || 
+                      (a.name && ingredientesDisponiveis.some(ing => a.name.toLowerCase().includes(ing)));
+                      
+    const bTemVerde = (b.ings && b.ings.some(ing => ingredientesDisponiveis.includes(ing.name.toLowerCase()))) || 
+                      (b.name && ingredientesDisponiveis.some(ing => b.name.toLowerCase().includes(ing)));
 
-  // Sorteio (Shuffle) dos pratos disponíveis
-  const almocosSorteados = [...poolAlmocos].sort(() => 0.5 - Math.random());
-  const lanchesSorteados = [...poolLanches].sort(() => 0.5 - Math.random());
+    // Se a receita 'a' tem ingredientes comprados e 'b' não tem, 'a' passa para a frente
+    return (bTemVerde ? 1 : 0) - (aTemVerde ? 1 : 0);
+  });
+
+  // Separar o banco completo (que agora tem os ingredientes verdes no topo) em Almoços e Lanches
+  const almocosValidos = poolOrdenado.filter(r => ['bovina', 'frango', 'porco', 'peixe', 'peru', 'veg'].includes(r.cat) || r.cat === 'Almoço/Marmita');
+  const lanchesValidos = poolOrdenado.filter(r => r.cat === 'Lanches' || r.cat === 'lanches' || r.type === 'wrap' || r.type === 'tosta' || r.cat === 'Lanche');
+
+  // Sorteio inteligente: Garante que os primeiros pratos a serem escolhidos são os que estão no topo (os verdes!)
+  // Mas se precisar de mais, ele vai buscar os pratos normais logo a seguir sem quebrar a app
+  const almocosSorteados = almocosValidos;
+  const lanchesSorteados = lanchesValidos;
 
   // 3. MONTAR O MENU DO MARIDO (5 Almoços)
   let escolhaAlmocos = [];
