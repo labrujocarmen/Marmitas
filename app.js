@@ -393,12 +393,28 @@ window.setPantryStatus = function(index, newStatus) {
   const item = S.pantryStock[index];
   
   item.status = newStatus;
+  
+  // Mantém a lógica interna do programador
   if (newStatus === 'tenho') {
     item.has = true;
   } else if (newStatus === 'falta') {
     item.has = false;
   } else if (newStatus === 'nao_usar') {
     item.has = true;
+  }
+
+  // LOGÍSTICA COMPRAS (Sexta/Segunda): Liga a Despensa ao Carrinho
+  const itemName = item.name;
+  if (!S.shoppingList) S.shoppingList = [];
+
+  if (newStatus === 'falta') {
+    // Se marcou que falta, põe na lista de compras
+    if (!S.shoppingList.includes(itemName)) {
+      S.shoppingList.push(itemName);
+    }
+  } else if (newStatus === 'tenho') {
+    // Se comprou e marcou 'tenho', tira da lista de compras automaticamente
+    S.shoppingList = S.shoppingList.filter(name => name !== itemName);
   }
 
   save(); 
@@ -574,29 +590,29 @@ function renderRecipes() {
   let filtered = all.filter(r => {
     const nomeNorm = normalizar(r.name);
     const catNorm = normalizar(r.cat);
-    const typeNorm = normalizar(r.type);
-    
-    // Procura no nome, na categoria ou no tipo da receita
-    return nomeNorm.includes(queryNormalizada) || catNorm.includes(queryNormalizada) || typeNorm.includes(queryNormalizada);
+    return nomeNorm.includes(queryNormalizada) || catNorm.includes(queryNormalizada);
   });
 
   // 2. MAPEAMENTO DE CATEGORIAS AUTOMÁTICO (Traduz o JSON para os botões da App)
-  const currentF = S.currentRecipeFilter;
+  const currentF = S.currentRecipeFilter.toLowerCase();
   if (currentF !== 'todos') {
     if (currentF === 'frango') {
       filtered = filtered.filter(r => r.cat === 'frango' || r.cat === 'peru' || (r.name && r.name.toLowerCase().includes('frango')));
     } else if (currentF === 'carne') {
       filtered = filtered.filter(r => r.cat === 'bovina' || r.cat === 'porco' || r.cat === 'Carne' || (r.name && (r.name.toLowerCase().includes('vaca') || r.name.toLowerCase().includes('porco') || r.name.toLowerCase().includes('hamburguer') || r.name.toLowerCase().includes('carne'))));
     } else if (currentF === 'peixe') {
-      filtered = filtered.filter(r => r.cat === 'peixe' || (r.name && (r.name.toLowerCase().includes('peixe') || r.name.toLowerCase().includes('bacalhau') || r.name.toLowerCase().includes('sardinha'))));
+      filtered = filtered.filter(r => r.cat === 'peixe' || (r.name && r.name.toLowerCase().includes('peixe')));
     } else if (currentF === 'lanches') {
       filtered = filtered.filter(r => r.cat === 'Lanches' || r.cat === 'lanches' || r.type === 'wrap' || r.type === 'tosta' || (r.name && r.name.toLowerCase().includes('lanche')));
     } else if (currentF === 'saladas') {
-      filtered = filtered.filter(r => r.cat === 'Saladas' || r.cat === 'saladas' || (r.name && r.name.toLowerCase().includes('salada')));
+      filtered = filtered.filter(r => r.cat === 'Saladas' || r.cat === 'saladas');
     } else if (currentF === 'sobremesas') {
-      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.cat === 'sobremesas' || (r.name && r.name.toLowerCase().includes('sobremesa')));
+      filtered = filtered.filter(r => r.cat === 'Sobremesas' || r.cat === 'sobremesas');
     }
   }
+
+  // 3. SELEÇÃO DE CATEGORIAS DISPONÍVEIS
+  const categories = ['Todos', 'Frango', 'Carne', 'Peixe', 'Lanches', 'Saladas', 'Sobremesas'];
 
 
   window.setRecipeFilter = function(filterName) { S.currentRecipeFilter = filterName; save(); render(); };
